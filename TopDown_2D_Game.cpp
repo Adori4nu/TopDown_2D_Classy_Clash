@@ -25,7 +25,8 @@ int main()
         window_width / 2.0f - ASET_SCALE * (0.5f * player_idle_texture.width / 6.0f),
         window_height / 2.0f - ASET_SCALE * (0.5f * player_idle_texture.height)
     };
-
+    // 1 : facing right, -1 : facing left
+    float rightLeft{1.f};
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -56,8 +57,8 @@ int main()
         if (Vector2Length(direction) != 0)
         {
             // Set map_pos = map_pos - direction
-            Vector2Normalize(direction);
-            map_pos = Vector2Subtract(map_pos, Vector2Scale(direction, speed));
+            map_pos = Vector2Subtract(map_pos, Vector2Scale(Vector2Normalize(direction), speed));
+            direction.x < 0.f ? rightLeft = -1.f : rightLeft = 1.f;
         }
 
         //----------------------------------------------------------------------------------
@@ -72,7 +73,7 @@ int main()
         DrawTextureEx(map_texture, map_pos, 0, ASET_SCALE, WHITE);
 
         // Draw player character
-        Rectangle player_source{0.f, 0.f, (float)player_idle_texture.width / 6.f, (float)player_idle_texture.height};
+        Rectangle player_source{0.f, 0.f, rightLeft * (float)player_idle_texture.width / 6.f, (float)player_idle_texture.height};
         Rectangle player_dest{player_pos.x, player_pos.y, ASET_SCALE * (float)player_idle_texture.width / 6.f, ASET_SCALE * (float)player_idle_texture.height};
         DrawTexturePro(player_idle_texture, player_source, player_dest, Vector2{}, 0.f, WHITE);
 
