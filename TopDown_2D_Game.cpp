@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <raymath.h>
 
 
 int main()
@@ -11,6 +12,8 @@ int main()
     InitWindow(screenWidth, screenHeight, "Top Down 2D Game");
     
     Texture2D map_texture = LoadTexture("textures/tiled_maps/map.png");
+    Vector2 map_pos{0.0f, 0.0f};
+    float speed{4.0};
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -18,9 +21,33 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+        // float delta_time{GetFrameTime()};
         // Update
         //----------------------------------------------------------------------------------
-        
+        Vector2 direction{};
+        if (IsKeyDown(KEY_A))
+        {
+            direction.x -= 1.0f;
+        }
+        if (IsKeyDown(KEY_D))
+        {
+            direction.x += 1.0f;
+        }
+        if (IsKeyDown(KEY_W))
+        {
+            direction.y -= 1.0f;
+        }
+        if (IsKeyDown(KEY_S))
+        {
+            direction.y += 1.0f;
+        }
+        if (Vector2Length(direction) != 0)
+        {
+            Vector2Normalize(direction);
+            // set map_pos = map_pos - direction
+            map_pos = Vector2Subtract(map_pos, Vector2Scale(direction, speed));
+        }
+
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -28,7 +55,7 @@ int main()
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
-        DrawTextureEx(map_texture, (Vector2){0, 0}, 0, 4.0f, WHITE);
+        DrawTextureEx(map_texture, map_pos, 0, 4.0f, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
