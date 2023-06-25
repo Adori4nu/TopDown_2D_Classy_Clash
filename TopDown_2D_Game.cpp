@@ -1,19 +1,31 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#define ASET_SCALE 4.0f
 
 int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth{384};
-    const int screenHeight{384};
+    const int window_width{384};
+    const int window_height{384};
 
-    InitWindow(screenWidth, screenHeight, "Top Down 2D Game");
+    InitWindow(window_width, window_height, "Top Down 2D Game");
     
+    // Map
     Texture2D map_texture = LoadTexture("textures/tiled_maps/map.png");
     Vector2 map_pos{0.0f, 0.0f};
     float speed{4.0};
+
+    // Player
+    Texture2D player_idle_texture = LoadTexture("textures/characters/knight_idle_spritesheet.png");
+    Texture2D player_runing_texture = LoadTexture("texture/characters/knight_run_spritesheet.png");
+    Vector2 player_pos
+    {
+        window_width / 2.0f - ASET_SCALE * (0.5f * player_idle_texture.width / 6.0f),
+        window_height / 2.0f - ASET_SCALE * (0.5f * player_idle_texture.height)
+    };
+
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -43,8 +55,8 @@ int main()
         }
         if (Vector2Length(direction) != 0)
         {
+            // Set map_pos = map_pos - direction
             Vector2Normalize(direction);
-            // set map_pos = map_pos - direction
             map_pos = Vector2Subtract(map_pos, Vector2Scale(direction, speed));
         }
 
@@ -55,7 +67,14 @@ int main()
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
-        DrawTextureEx(map_texture, map_pos, 0, 4.0f, WHITE);
+
+        // Draw the map
+        DrawTextureEx(map_texture, map_pos, 0, ASET_SCALE, WHITE);
+
+        // Draw player character
+        Rectangle player_source{0.f, 0.f, (float)player_idle_texture.width / 6.f, (float)player_idle_texture.height};
+        Rectangle player_dest{player_pos.x, player_pos.y, ASET_SCALE * (float)player_idle_texture.width / 6.f, ASET_SCALE * (float)player_idle_texture.height};
+        DrawTexturePro(player_idle_texture, player_source, player_dest, Vector2{}, 0.f, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
