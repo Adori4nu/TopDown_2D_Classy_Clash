@@ -19,14 +19,19 @@ int main()
 
     // Player
     Texture2D player_idle_texture = LoadTexture("textures/characters/knight_idle_spritesheet.png");
-    Texture2D player_runing_texture = LoadTexture("texture/characters/knight_run_spritesheet.png");
+    Texture2D player_runing_texture = LoadTexture("textures/characters/knight_run_spritesheet.png");
+    Texture2D player_texture;
     Vector2 player_pos
     {
         window_width / 2.0f - ASET_SCALE * (0.5f * player_idle_texture.width / 6.0f),
         window_height / 2.0f - ASET_SCALE * (0.5f * player_idle_texture.height)
     };
     // 1 : facing right, -1 : facing left
-    float rightLeft{1.f};
+    float right_left{1.f};
+    float running_time{0.f};
+    int anim_frame{0};
+    const int max_anim_frame{6};
+    const float anim_frame_update_time{1.f / 12.f};
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -34,7 +39,7 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // float delta_time{GetFrameTime()};
+        float delta_time{GetFrameTime()};
         // Update
         //----------------------------------------------------------------------------------
         Vector2 direction{};
@@ -58,7 +63,12 @@ int main()
         {
             // Set map_pos = map_pos - direction
             map_pos = Vector2Subtract(map_pos, Vector2Scale(Vector2Normalize(direction), speed));
-            direction.x < 0.f ? rightLeft = -1.f : rightLeft = 1.f;
+            direction.x < 0.f ? right_left = -1.f : right_left = 1.f;
+            player_texture = player_runing_texture;
+        }
+        else
+        {
+            player_texture = player_idle_texture;
         }
 
         //----------------------------------------------------------------------------------
@@ -72,10 +82,21 @@ int main()
         // Draw the map
         DrawTextureEx(map_texture, map_pos, 0, ASET_SCALE, WHITE);
 
+        running_time += delta_time;
+        if (running_time >= anim_frame_update_time)
+        {
+            anim_frame++;
+            running_time = 0.f;
+            if (anim_frame > max_anim_frame)
+            {
+                anim_frame = 0;
+            }
+        }
+
         // Draw player character
-        Rectangle player_source{0.f, 0.f, rightLeft * (float)player_idle_texture.width / 6.f, (float)player_idle_texture.height};
-        Rectangle player_dest{player_pos.x, player_pos.y, ASET_SCALE * (float)player_idle_texture.width / 6.f, ASET_SCALE * (float)player_idle_texture.height};
-        DrawTexturePro(player_idle_texture, player_source, player_dest, Vector2{}, 0.f, WHITE);
+        Rectangle player_source{anim_frame * (float)player_texture.width/6.f, 0.f, right_left * (float)player_texture.width/6.f, (float)player_texture.height};
+        Rectangle player_dest{player_pos.x, player_pos.y, ASET_SCALE * (float)player_texture.width / 6.f, ASET_SCALE * (float)player_texture.height};
+        DrawTexturePro(player_texture, player_source, player_dest, Vector2{}, 0.f, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
