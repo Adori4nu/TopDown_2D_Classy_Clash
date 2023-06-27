@@ -1,5 +1,5 @@
 #include "Character.hpp"
-#include "raymath.h"
+#include <raymath.h>
 
 void Character::tick(float delta_time)
 {
@@ -45,5 +45,15 @@ void Character::tick(float delta_time)
 
     Rectangle source{frame * width, 0.f, right_left * width, height};
     Rectangle dest{screen_position.x, screen_position.y, sprite_scale * width, sprite_scale * height};
-    DrawTexturePro(texture, source, dest, Vector2{sprite_scale * width * 0.5f, sprite_scale * height * 0.5f}, 0.f, WHITE);
+    DrawTexturePro(texture, source, dest, Vector2{}, 0.f, WHITE);
+}
+
+Rectangle Character::GetCollisionRectangle() const
+{
+    return Rectangle {
+        screen_position.x,
+        screen_position.y,
+        sprite_scale * width,
+        sprite_scale * height
+    };
 }

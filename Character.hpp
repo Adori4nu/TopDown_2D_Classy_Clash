@@ -1,5 +1,5 @@
 #pragma once
-#include "raylib.h"
+#include <raylib.h>
 
 class Character
 {
@@ -17,6 +17,7 @@ public:
     void tick(float delta_time);
     void UndoMovement() { world_position = world_position_last_frame; };
     Vector2 GetWorldPosition() const { return world_position; };
+    Rectangle GetCollisionRectangle() const;
     ~Character() 
     {
         UnloadTexture(texture); 

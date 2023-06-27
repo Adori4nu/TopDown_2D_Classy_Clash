@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#include "Prop.hpp"
 #include "Character.hpp"
 
 #define ASSET_SCALE 4.0f
@@ -17,6 +18,18 @@ int main()
     // Map
     Texture2D map_texture = LoadTexture("textures/tiled_maps/map.png");
     Vector2 map_pos{0.0f, 0.0f};
+
+    // Prop
+        // Gruz
+    Texture2D rock_texture = LoadTexture("textures/tiled_maps/Rock.png");
+        // Log
+    Texture2D log_texture = LoadTexture("textures/tiled_maps/Log.png");
+
+    Prop props[2]
+    {
+        Prop{Vector2{9*32.f, 9*32.f}, rock_texture, 1.f},
+        Prop{Vector2{12*32.f, 12*32.f}, log_texture, 2.f},
+    };
 
     // Player
     Character player{window_width, window_height};
@@ -43,6 +56,12 @@ int main()
         // Draw the map
         DrawTextureEx(map_texture, map_pos, 0, ASSET_SCALE, WHITE);
 
+        // Draw props
+        for (auto& prop : props)
+        {
+            prop.Render(player.GetWorldPosition());
+        }
+
         // Draw player character
         player.tick(delta_time);
         if (player.GetWorldPosition().x < 0.f ||
@@ -53,6 +72,13 @@ int main()
         {
             player.UndoMovement();
         }
+        for (auto& prop : props)
+        {
+            if (CheckCollisionRecs(player.GetCollisionRectangle(), prop.GetCollisionRectangle(player.GetWorldPosition())))
+            {
+                player.UndoMovement();
+            }
+        }
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -61,6 +87,7 @@ int main()
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadTexture(map_texture);     // Unload map texture
+    UnloadTexture(rock_texture);    // Unload rock texture
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
