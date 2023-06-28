@@ -33,12 +33,15 @@ int main()
     };
 
     // Player
-    Character player{window_width, window_height};
+    Texture2D player_idle_texture = LoadTexture("textures/characters/knight_idle_spritesheet.png");
+    Texture2D player_runing_texture = LoadTexture("textures/characters/knight_run_spritesheet.png");
+    Character player{window_width, window_height, player_idle_texture, player_runing_texture, Vector2{0.f, 0.f}, 4.f};
 
     // Enemy
     Texture2D goblin_idle_texture = LoadTexture("textures/characters/goblin_idle_spritesheet.png");
     Texture2D goblin_run_texture = LoadTexture("textures/characters/goblin_run_spritesheet.png");
-    Enemy goblin{goblin_idle_texture, goblin_run_texture, Vector2{32.f, 32.f}, 2.0f};
+    Enemy goblin{goblin_idle_texture, goblin_run_texture, Vector2{7*32.f, 7*32.f}, 2.0f};
+    goblin.SetTarget(&player);
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
