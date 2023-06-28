@@ -1,8 +1,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
-#include "Prop.hpp"
 #include "Character.hpp"
+#include "Enemy.hpp"
+#include "Prop.hpp"
 
 #define ASSET_SCALE 4.0f
 
@@ -33,6 +34,11 @@ int main()
 
     // Player
     Character player{window_width, window_height};
+
+    // Enemy
+    Texture2D goblin_idle_texture = LoadTexture("textures/characters/goblin_idle_spritesheet.png");
+    Texture2D goblin_run_texture = LoadTexture("textures/characters/goblin_run_spritesheet.png");
+    Enemy goblin{goblin_idle_texture, goblin_run_texture, Vector2{32.f, 32.f}, 2.0f};
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -79,6 +85,7 @@ int main()
                 player.UndoMovement();
             }
         }
+        goblin.tick(delta_time);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -88,6 +95,9 @@ int main()
     //--------------------------------------------------------------------------------------
     UnloadTexture(map_texture);     // Unload map texture
     UnloadTexture(rock_texture);    // Unload rock texture
+    UnloadTexture(log_texture);     // Unload log texture
+    UnloadTexture(goblin_idle_texture);     // Unload goblin idle texture
+    UnloadTexture(goblin_run_texture);     // Unload goblin run texture
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
