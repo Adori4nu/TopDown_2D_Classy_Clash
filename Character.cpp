@@ -40,6 +40,43 @@ void Character::tick(float delta_time)
     }
 
     BaseCharacter::tick(delta_time);
+
+    Vector2 orirgin_of_weapon{};
+    Vector2 weapon_origin_offset{};
+    float rotation{};
+    if (right_left > 0.f)
+    {
+        orirgin_of_weapon = Vector2{0.0f, _weapon_texture.height * _weapon_scale};
+        weapon_origin_offset = Vector2{35.f, 50.f};
+        _weapon_collision_rectangle = 
+        {
+            GetScreenPosition().x + weapon_origin_offset.x,
+            GetScreenPosition().y + weapon_origin_offset.y - _weapon_texture.height * _weapon_scale,
+            _weapon_texture.width * _weapon_scale,
+            _weapon_texture.height * _weapon_scale
+        };
+        rotation = 35.f;
+    }
+    else
+    {
+        orirgin_of_weapon = Vector2{_weapon_texture.width * _weapon_scale, _weapon_texture.height * _weapon_scale};
+        weapon_origin_offset = Vector2{25.f, 50.f};
+        _weapon_collision_rectangle = 
+        {
+            GetScreenPosition().x + weapon_origin_offset.x - _weapon_texture.width * _weapon_scale,
+            GetScreenPosition().y + weapon_origin_offset.y - _weapon_texture.height * _weapon_scale,
+            _weapon_texture.width * _weapon_scale,
+            _weapon_texture.height * _weapon_scale
+        };
+        rotation = -35.f;
+    }
+
+
+    Rectangle source{0.0f, 0.0f, static_cast<float>(_weapon_texture.width) * right_left, static_cast<float>(_weapon_texture.height)};
+    Rectangle dest{GetScreenPosition().x + weapon_origin_offset.x, GetScreenPosition().y + weapon_origin_offset.y, static_cast<float>(_weapon_texture.width) * _weapon_scale, static_cast<float>(_weapon_texture.height) * _weapon_scale};
+    DrawTexturePro(_weapon_texture, source, dest, orirgin_of_weapon, rotation, WHITE);
+
+    DrawRectangleLines(_weapon_collision_rectangle.x, _weapon_collision_rectangle.y, _weapon_collision_rectangle.width, _weapon_collision_rectangle.height, RED);
 }
 
 Vector2 Character::GetScreenPosition() const

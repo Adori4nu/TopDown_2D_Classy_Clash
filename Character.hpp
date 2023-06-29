@@ -15,9 +15,13 @@ public:
     {
         UnloadTexture(_texture); 
         UnloadTexture(_idle_texture);
-        UnloadTexture(_runing_texture);    
+        UnloadTexture(_runing_texture);
+        UnloadTexture(_weapon_texture); 
     };
 private:
     int _window_width{};
     int _window_height{};
+    Texture2D _weapon_texture{LoadTexture("textures/characters/weapon_sword.png")};
+    Rectangle _weapon_collision_rectangle{};
+    float _weapon_scale{2.5f};
 };
