@@ -10,7 +10,9 @@ public:
 
     virtual void tick(float delta_time) override;
     virtual Vector2 GetScreenPosition() const override;
-
+    Rectangle GetWeaponCollisionRectangle() const { return _weapon_collision_rectangle; };
+    float GetHealth() const { return _health; };
+    void TakeDamage(float damage);
     ~Character() 
     {
         UnloadTexture(_texture); 
@@ -24,4 +26,5 @@ private:
     Texture2D _weapon_texture{LoadTexture("textures/characters/weapon_sword.png")};
     Rectangle _weapon_collision_rectangle{};
     float _weapon_scale{2.5f};
+    float _health{100.f};
 };

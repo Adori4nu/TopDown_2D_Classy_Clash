@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <string>
 
 #include "Character.hpp"
 #include "Enemy.hpp"
@@ -29,7 +30,7 @@ int main()
     Prop props[2]
     {
         Prop{Vector2{9*32.f, 9*32.f}, rock_texture, 1.f},
-        Prop{Vector2{12*32.f, 12*32.f}, log_texture, 2.f},
+        Prop{Vector2{15*32.f, 15*32.f}, log_texture, 2.f},
     };
 
     // Player
@@ -40,8 +41,19 @@ int main()
     // Enemy
     Texture2D goblin_idle_texture = LoadTexture("textures/characters/goblin_idle_spritesheet.png");
     Texture2D goblin_run_texture = LoadTexture("textures/characters/goblin_run_spritesheet.png");
-    Enemy goblin{goblin_idle_texture, goblin_run_texture, Vector2{7*32.f, 7*32.f}, 2.0f};
-    goblin.SetTarget(&player);
+
+    Enemy enemies[4]
+    {
+        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{7*32.f, 7*32.f}, 2.0f, 2.5f, 5.f},
+        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{8*32.f, 8*32.f}, 3.0f, 2.f, 6.5f},
+        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{12*32.f, 12*32.f}, 4.0f, 1.75f, 7.25f},
+        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{9*32.f, 9*32.f}, 6.0f, 1.5f, 10.f},
+    };
+
+    for (auto& enemy : enemies)
+    {
+        enemy.SetTarget(&player);
+    }
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -71,6 +83,19 @@ int main()
             prop.Render(player.GetWorldPosition());
         }
 
+        if (!player.IsAlive())
+        {
+            DrawText("Game Over!", window_width / 2 - MeasureText("Game Over!", 40) / 2, window_height / 2 - 40, 40, RED);
+            EndDrawing();
+            continue;
+        }
+        else
+        {
+            std::string player_health{"Health: "};
+            player_health.append(std::to_string(player.GetHealth()), 0, 5);
+            DrawText(player_health.c_str(), 55, 45, 40, RED);
+        }
+
         // Draw player character
         player.tick(delta_time);
         if (player.GetWorldPosition().x < 0.f ||
@@ -88,7 +113,20 @@ int main()
                 player.UndoMovement();
             }
         }
-        goblin.tick(delta_time);
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            for (auto& enemy : enemies)
+            {
+                if (CheckCollisionRecs(player.GetWeaponCollisionRectangle(), enemy.GetCollisionRectangle()))
+                {
+                    enemy.SetIsAlive(false);
+                }
+            }
+        };
+        for (auto& enemy : enemies)
+        {
+            enemy.tick(delta_time);
+        }
 
         EndDrawing();
         //----------------------------------------------------------------------------------

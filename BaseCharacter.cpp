@@ -19,7 +19,7 @@ void BaseCharacter::tick(float delta_time)
     if (Vector2Length(velocity) != 0)
     {
         // Set world_position = world_position + velocity
-        world_position = Vector2Add(world_position, Vector2Scale(Vector2Normalize(velocity), speed));
+        world_position = Vector2Add(world_position, Vector2Scale(Vector2Normalize(velocity), _speed));
         velocity.x < 0.f ? right_left = -1.f : right_left = 1.f;
         _texture = _runing_texture;
     }

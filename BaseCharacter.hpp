@@ -17,6 +17,8 @@ public:
             sprite_scale * height
         };
     }
+    bool IsAlive() const { return is_alive; };
+    void SetIsAlive(bool alive) { is_alive = alive; };
 protected:
     Texture2D _texture{};
     Texture2D _idle_texture{};
@@ -29,8 +31,10 @@ protected:
     int frame{};
     int max_frame{6};
     float frame_update_time{1.f / 12.f};
-    float speed{4.f};
+    float _speed{4.f};
     float sprite_scale{4.f};
     float width{};
     float height{};
+private:
+    bool is_alive{true};
 };

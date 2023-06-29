@@ -21,7 +21,10 @@ Character::Character(
 
 void Character::tick(float delta_time)
 {
-
+    if (!IsAlive())
+    {
+        return;
+    }
     if (IsKeyDown(KEY_A))
     {
         velocity.x -= 1.0f;
@@ -55,7 +58,7 @@ void Character::tick(float delta_time)
             _weapon_texture.width * _weapon_scale,
             _weapon_texture.height * _weapon_scale
         };
-        rotation = 35.f;
+        rotation = IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 45.f : -15.f;
     }
     else
     {
@@ -68,15 +71,13 @@ void Character::tick(float delta_time)
             _weapon_texture.width * _weapon_scale,
             _weapon_texture.height * _weapon_scale
         };
-        rotation = -35.f;
+        rotation = IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? -45.f : 15.f;
     }
 
 
     Rectangle source{0.0f, 0.0f, static_cast<float>(_weapon_texture.width) * right_left, static_cast<float>(_weapon_texture.height)};
     Rectangle dest{GetScreenPosition().x + weapon_origin_offset.x, GetScreenPosition().y + weapon_origin_offset.y, static_cast<float>(_weapon_texture.width) * _weapon_scale, static_cast<float>(_weapon_texture.height) * _weapon_scale};
     DrawTexturePro(_weapon_texture, source, dest, orirgin_of_weapon, rotation, WHITE);
-
-    DrawRectangleLines(_weapon_collision_rectangle.x, _weapon_collision_rectangle.y, _weapon_collision_rectangle.width, _weapon_collision_rectangle.height, RED);
 }
 
 Vector2 Character::GetScreenPosition() const
@@ -86,4 +87,13 @@ Vector2 Character::GetScreenPosition() const
         static_cast<float>(_window_width) * 0.5f - sprite_scale * (0.5f * width),
         static_cast<float>(_window_height) * 0.5f - sprite_scale * (0.5f * height)
     };
+}
+
+void Character::TakeDamage(float damage)
+{
+    _health -= damage;
+    if (_health <= 0.f)
+    {
+        SetIsAlive(false);
+    }
 }
