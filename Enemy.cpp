@@ -21,12 +21,12 @@ void Enemy::tick(float delta_time)
     {
         return;
     }
-    Vector2 to_target = Vector2Normalize(Vector2Subtract(_target->GetScreenPosition(), screen_position));
-
-    world_position = Vector2Add(world_position, Vector2Scale(to_target, speed));
-
-    screen_position = Vector2Subtract(world_position, _target->GetWorldPosition());
+    velocity = Vector2Subtract(_target->GetScreenPosition(), GetScreenPosition());
 
     BaseCharacter::tick(delta_time);
 }
 
+Vector2 Enemy::GetScreenPosition() const
+{
+    return Vector2Subtract(world_position, _target->GetWorldPosition());
+}

@@ -1,4 +1,5 @@
 #include "BaseCharacter.hpp"
+#include <raymath.h>
 
 void BaseCharacter::tick(float delta_time)
 {
@@ -15,7 +16,20 @@ void BaseCharacter::tick(float delta_time)
         }
     }
 
+    if (Vector2Length(velocity) != 0)
+    {
+        // Set world_position = world_position + velocity
+        world_position = Vector2Add(world_position, Vector2Scale(Vector2Normalize(velocity), speed));
+        velocity.x < 0.f ? right_left = -1.f : right_left = 1.f;
+        _texture = _runing_texture;
+    }
+    else
+    {
+        _texture = _idle_texture;
+    }
+    velocity = {};
+
     Rectangle source{frame * width, 0.f, right_left * width, height};
-    Rectangle dest{screen_position.x, screen_position.y, sprite_scale * width, sprite_scale * height};
+    Rectangle dest{GetScreenPosition().x, GetScreenPosition().y, sprite_scale * width, sprite_scale * height};
     DrawTexturePro(_texture, source, dest, Vector2{}, 0.f, WHITE);
 };

@@ -7,11 +7,12 @@ public:
     virtual void tick(float delta_time);
     void UndoMovement() { world_position = world_position_last_frame; };
     Vector2 GetWorldPosition() const { return world_position; };
+    virtual Vector2 GetScreenPosition() const = 0;
     Rectangle GetCollisionRectangle() const
     {
         return Rectangle {
-            screen_position.x,
-            screen_position.y,
+            GetScreenPosition().x,
+            GetScreenPosition().y,
             sprite_scale * width,
             sprite_scale * height
         };
@@ -20,9 +21,9 @@ protected:
     Texture2D _texture{};
     Texture2D _idle_texture{};
     Texture2D _runing_texture{};
-    Vector2 screen_position{};
     Vector2 world_position{};
     Vector2 world_position_last_frame{};
+    Vector2 velocity{};
     float right_left{1.f};
     float running_time{};
     int frame{};
