@@ -39,20 +39,39 @@ int main()
     Character player{window_width, window_height, player_idle_texture, player_runing_texture, Vector2{0.f, 0.f}, 4.f};
 
     // Enemy
+        // Goblin
     Texture2D goblin_idle_texture = LoadTexture("textures/characters/goblin_idle_spritesheet.png");
     Texture2D goblin_run_texture = LoadTexture("textures/characters/goblin_run_spritesheet.png");
 
-    Enemy enemies[4]
+    Enemy goblin_minion {goblin_idle_texture, goblin_run_texture, Vector2{16*32.f, 16*32.f}, 2.0f, 2.5f, 5.f};
+    Enemy goblin_small {goblin_idle_texture, goblin_run_texture, Vector2{24*32.f, 24*32.f}, 3.0f, 2.f, 6.5f};
+    Enemy goblin_med {goblin_idle_texture, goblin_run_texture, Vector2{12*32.f, 12*32.f}, 4.0f, 1.75f, 7.25f};
+    Enemy goblin_boss {goblin_idle_texture, goblin_run_texture, Vector2{48*32.f, 48*32.f}, 6.0f, 1.5f, 10.f};
+
+        // Slime
+    Texture2D slime_idle_texture = LoadTexture("textures/characters/slime_idle_spritesheet.png");
+    Texture2D slime_run_texture = LoadTexture("textures/characters/slime_run_spritesheet.png");
+
+    Enemy slime_minion {slime_idle_texture, slime_run_texture, Vector2{13*32.f, 13*32.f}, 2.0f, 2.5f * 1.5f, 5.f / 3};
+    Enemy slime_small {slime_idle_texture, slime_run_texture, Vector2{27*32.f, 27*32.f}, 3.0f, 2.f * 1.5f, 6.5f / 3};
+    Enemy slime_med {slime_idle_texture, slime_run_texture, Vector2{42*32.f, 42*32.f}, 4.0f, 1.75f * 1.5f, 7.25f / 3};
+    Enemy slime_boss {slime_idle_texture, slime_run_texture, Vector2{36*32.f, 36*32.f}, 6.0f, 1.5f * 1.5f, 10.f / 3};
+
+    Enemy* enemies[]
     {
-        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{7*32.f, 7*32.f}, 2.0f, 2.5f, 5.f},
-        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{8*32.f, 8*32.f}, 3.0f, 2.f, 6.5f},
-        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{12*32.f, 12*32.f}, 4.0f, 1.75f, 7.25f},
-        Enemy {goblin_idle_texture, goblin_run_texture, Vector2{9*32.f, 9*32.f}, 6.0f, 1.5f, 10.f},
+        &goblin_minion,
+        &goblin_small,
+        &goblin_med,
+        &goblin_boss,
+        &slime_minion,
+        &slime_small,
+        &slime_med,
+        &slime_boss
     };
 
-    for (auto& enemy : enemies)
+    for (auto enemy : enemies)
     {
-        enemy.SetTarget(&player);
+        enemy->SetTarget(&player);
     }
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
@@ -115,17 +134,17 @@ int main()
         }
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
-            for (auto& enemy : enemies)
+            for (auto enemy : enemies)
             {
-                if (CheckCollisionRecs(player.GetWeaponCollisionRectangle(), enemy.GetCollisionRectangle()))
+                if (CheckCollisionRecs(player.GetWeaponCollisionRectangle(), enemy->GetCollisionRectangle()))
                 {
-                    enemy.SetIsAlive(false);
+                    enemy->SetIsAlive(false);
                 }
             }
         };
-        for (auto& enemy : enemies)
+        for (auto enemy : enemies)
         {
-            enemy.tick(delta_time);
+            enemy->tick(delta_time);
         }
 
         EndDrawing();

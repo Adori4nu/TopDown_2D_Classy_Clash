@@ -23,6 +23,11 @@ void Enemy::tick(float delta_time)
         return;
     }
     velocity = Vector2Subtract(_target->GetScreenPosition(), GetScreenPosition());
+   
+    if (Vector2Length(velocity) < _radius)
+    {
+        velocity = {};
+    }
 
     BaseCharacter::tick(delta_time);
 

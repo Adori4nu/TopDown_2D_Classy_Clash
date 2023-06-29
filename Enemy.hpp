@@ -15,4 +15,5 @@ public:
 private:
     Character* _target;
     float _damage_per_second{10.f};
+    float _radius{25.f};
 };
