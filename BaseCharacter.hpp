@@ -1,14 +1,19 @@
 #pragma once
-#include <raylib.h>
+#include "include/raylib.h"
+
+#include <iostream>
+
+#include "ParticleSystem.hpp"
 
 class BaseCharacter
 {
 public:
     virtual void tick(float delta_time);
-    void UndoMovement() { world_position = world_position_last_frame; };
-    Vector2 GetWorldPosition() const { return world_position; };
+    __forceinline void UndoMovement() { world_position = world_position_last_frame; };
+    int TakeDamage(int damage);
+    __forceinline Vector2 GetWorldPosition() const { return world_position; };
     virtual Vector2 GetScreenPosition() const = 0;
-    Rectangle GetCollisionRectangle() const
+    virtual Rectangle GetCollisionRectangle() const
     {
         return Rectangle {
             GetScreenPosition().x,
@@ -17,8 +22,30 @@ public:
             sprite_scale * height
         };
     }
-    bool IsAlive() const { return is_alive; };
-    void SetIsAlive(bool alive) { is_alive = alive; };
+    __forceinline Vector2 GetVelocity() const { return velocity; };
+    __forceinline int GetHealth() const { return _health; };
+    __forceinline ParticleProps GetParticleToEmit() const { return m_Particle; };
+    __forceinline bool IsAlive() const { return is_alive; };
+    __forceinline void SetIsAlive(bool alive) { is_alive = alive; };
+    __forceinline void SetParticleToEmitPosition(Vector2 particle_position) { m_Particle.Position = particle_position; };
+    __forceinline void SetParticleToEmitType(Type particle_type) { m_Particle.type = particle_type; };
+    
+    friend std::ostream& operator<<(std::ostream& os, const BaseCharacter& character) {
+        os << character.world_position.x << ' ' << character.world_position.y << ' '
+           << character._damage << ' ' << character._health << ' '
+           << character.m_Particle.SizeBegin << ' ' << character.m_Particle.SizeEnd << ' '
+           << character.m_Particle.SizeVariation << ' ' << character.m_Particle.VelocityVariation.x << ' '
+           << character.m_Particle.VelocityVariation.y << ' ' << character.m_Particle.Damage;
+        return os;
+    }
+    friend std::istream& operator>>(std::istream& is, BaseCharacter& character) {
+        is >> character.world_position.x >> character.world_position.y
+           >> character._damage >> character._health
+           >> character.m_Particle.SizeBegin >> character.m_Particle.SizeEnd
+           >> character.m_Particle.SizeVariation >> character.m_Particle.VelocityVariation.x
+           >> character.m_Particle.VelocityVariation.y >> character.m_Particle.Damage;
+        return is;
+    }
 protected:
     Texture2D _texture{};
     Texture2D _idle_texture{};
@@ -35,6 +62,10 @@ protected:
     float sprite_scale{4.f};
     float width{};
     float height{};
+    int _damage{10};
+    int _health{100};
+    ParticleSystem* _damage_particles;
+    ParticleProps m_Particle;
 private:
     bool is_alive{true};
 };

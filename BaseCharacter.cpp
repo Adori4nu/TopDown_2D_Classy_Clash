@@ -1,5 +1,5 @@
 #include "BaseCharacter.hpp"
-#include <raymath.h>
+#include "include/raymath.h"
 
 void BaseCharacter::tick(float delta_time)
 {
@@ -33,3 +33,14 @@ void BaseCharacter::tick(float delta_time)
     Rectangle dest{GetScreenPosition().x, GetScreenPosition().y, sprite_scale * width, sprite_scale * height};
     DrawTexturePro(_texture, source, dest, Vector2{}, 0.f, WHITE);
 };
+
+int BaseCharacter::TakeDamage(int damage)
+{
+    _health -= damage;
+    if (_health <= 0.f)
+    {
+        SetIsAlive(false);
+        return 1;
+    }
+    return 0;
+}
