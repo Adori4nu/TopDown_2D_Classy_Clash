@@ -18,6 +18,8 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
+    
+    // Atrybut klasowy - klasa Random posiada klasowy generator liczb losowych
     Random::Init();
 
     const int window_width{1280};
@@ -30,7 +32,7 @@ int main()
     Vector2 map_pos{0.0f, 0.0f};
 
     // Prop
-        // Gruz
+        // Rocks
     Texture2D rock_texture = LoadTexture("textures/tiled_maps/Rock.png");
         // Log
     Texture2D log_texture = LoadTexture("textures/tiled_maps/Log.png");
@@ -41,15 +43,23 @@ int main()
         Prop{Vector2{15*32.f, 15*32.f}, log_texture, 2.f},
     };
 
-    //ParticleSystem
+
+    // ParticleSystem
+    // Ekstensja - struktur cząsteczek domyślnie 100
     ParticleSystem damage_number_popups;
 
     // Player
     Texture2D player_idle_texture = LoadTexture("textures/characters/knight_idle_spritesheet.png");
     Texture2D player_runing_texture = LoadTexture("textures/characters/knight_run_spritesheet.png");
 
+    // Atrybut pochodny (wyliczany) - width(szerokość) gracza wyliczana jest na podstawie części szerokości jego tekstury zawierającej 6 spritów animacji
     Character player{window_width, window_height, player_idle_texture, player_runing_texture, ASSET_SCALE, damage_number_popups};
 
+    // Przeciążenie - klasa character posiada dwa różne konstruktory
+    Character dummy_NPC{window_width, window_height, player_idle_texture, player_runing_texture, Vector2{4*32.f, 4*32.f}, ASSET_SCALE, damage_number_popups};
+
+    // Ekstensja trwałość - gracz poprzez zapis pozycji oraz jego statystyk do pliku
+    //  które można wczytać w razie braku pliku incjalizujemy gracza w dommyślnej lokacji z domyślnymi statystykami
     std::ifstream inFile("character_data.txt");
     if (inFile.is_open()) {
         inFile >> player;
@@ -66,6 +76,7 @@ int main()
     Texture2D goblin_idle_texture = LoadTexture("textures/characters/goblin_idle_spritesheet.png");
     Texture2D goblin_run_texture = LoadTexture("textures/characters/goblin_run_spritesheet.png");
 
+    // Atrybut złożony - przeciwnik posiada pozycję w postaci wektora{x,y}
     Enemy goblin_minion {goblin_idle_texture, goblin_run_texture, Vector2{16*32.f, 16*32.f}, 2.0f, 2.5f, 5, 10, damage_number_popups};
     Enemy goblin_small {goblin_idle_texture, goblin_run_texture, Vector2{24*32.f, 24*32.f}, 3.0f, 2.f, 6, 20, damage_number_popups};
     Enemy goblin_medium {goblin_idle_texture, goblin_run_texture, Vector2{12*32.f, 12*32.f}, 4.0f, 1.75f, 7, 40, damage_number_popups};
@@ -119,7 +130,7 @@ int main()
             stop_playing = true;
             std::ofstream file("character_data.txt");
             if (file.is_open()) {
-                file << player; // Using the serialization operator
+                file << player;
                 file.close();
             } else {
                 std::cerr << "Unable to open file for writing." << std::endl;
@@ -164,7 +175,7 @@ int main()
             EndDrawing();
             std::ofstream file("character_data.txt");
             if (file.is_open()) {
-                file << player; // Using the serialization operator
+                file << player;
                 file.close();
             } else {
                 std::cerr << "Unable to open file for writing." << std::endl;
@@ -198,10 +209,21 @@ int main()
             {
                 if (CheckCollisionRecs(player.GetWeaponCollisionRectangle(), enemy->GetCollisionRectangle()) && enemy->IsAlive())
                 {
-                    player.IncreaseKillCount(enemy->TakeDamage(player.GetDamage()));
-                    player.SetParticleToEmitType(Type::ENEMY_HIT);
-                    player.SetParticleToEmitPosition({enemy->GetScreenPosition().x + 6*4.f, enemy->GetScreenPosition().y - 6 * 4.f});
-                    damage_number_popups.Emit(player.GetParticleToEmit());
+                    // Metoda klasowa - klasy Random generująca floata z zakresu 0 - 1
+                    if(Random::Float() * 100 < 90)
+                    {
+                        player.IncreaseKillCount(enemy->TakeDamage(player.GetDamage()));
+                        player.SetParticleToEmitType(Type::ENEMY_HIT);
+                        // Przesłonięcie - klasa enemy przesłania GetScreenPosition z BaseCharacter
+                        player.SetParticleToEmitPosition({enemy->GetScreenPosition().x + 6*4.f, enemy->GetScreenPosition().y - 6 * 4.f});
+                        damage_number_popups.Emit(player.GetParticleToEmit());
+                    }
+                    else
+                    {
+                        player.SetParticleToEmitType(Type::DODGE);
+                        player.SetParticleToEmitPosition({enemy->GetScreenPosition().x + 6*4.f, enemy->GetScreenPosition().y - 6 * 4.f});
+                        damage_number_popups.Emit(player.GetParticleToEmit());
+                    }
                 }
             }
         };
