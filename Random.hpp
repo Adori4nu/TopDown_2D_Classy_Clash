@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include <iostream>
 
 class Random
 {
@@ -10,12 +11,22 @@ public:
         s_RandomEngine.seed(std::random_device()());
     }
 
-    static float Float()
+    static float Float(float min, float max)
     {
-        return (float)s_Distribution(s_RandomEngine) / (float)std::numeric_limits<uint32_t>::max();
+        static std::uniform_real_distribution<> distrib(min, max);
+        std::cout << distrib(s_RandomEngine) << std::endl;
+        return distrib(s_RandomEngine);
+    }
+
+    static int Int(int min, int max)
+    {
+        static std::uniform_int_distribution<> distrib(min, max);
+        std::cout << distrib(s_RandomEngine) << std::endl;
+        return distrib(s_RandomEngine);
     }
     
 private:
+    static std::random_device rd;
     static std::mt19937 s_RandomEngine;
     static std::uniform_int_distribution<std::mt19937::result_type> s_Distribution;
 };

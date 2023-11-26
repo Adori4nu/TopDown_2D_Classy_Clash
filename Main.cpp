@@ -6,11 +6,14 @@
 #include <string>
 #include <vector>
 
-#include "Character.hpp"
-#include "Enemy.hpp"
+#include "BasePlayerCharacter.hpp"
+#include "BaseEnemy.hpp"
 #include "Prop.hpp"
 #include "ParticleSystem.hpp"
+#include "GameObject.hpp"
+#include "GraphicsEngine.hpp"
 #include "Random.hpp"
+#include "World.hpp"
 
 #define ASSET_SCALE 4.0f
 
@@ -19,7 +22,6 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     
-    // Atrybut klasowy - klasa Random posiada klasowy generator liczb losowych
     Random::Init();
 
     const int window_width{1280};
@@ -29,37 +31,41 @@ int main()
     
     // Map
     Texture2D map_texture = LoadTexture("textures/tiled_maps/map.png");
-    Vector2 map_pos{0.0f, 0.0f};
+    World base_level(map_texture);
+    World* world_ptr = &base_level;
 
     // Prop
         // Rocks
     Texture2D rock_texture = LoadTexture("textures/tiled_maps/Rock.png");
         // Log
     Texture2D log_texture = LoadTexture("textures/tiled_maps/Log.png");
+        // Tree
+    Texture2D cherry_tree = LoadTexture("textures/tiled_maps/cherry_tree.png");
 
-    Prop props[2]
+    Prop rock{ObjectType::Prop, Vector2{9*32.f, 9*32.f}, rock_texture, 1.f};
+    Prop log{ObjectType::Prop, Vector2{13*32.f, 10*32.f}, log_texture, 2.f};
+    Prop cherry{ObjectType::Prop, Vector2{12*32.f, 12*32.f}, cherry_tree, 4.f};
+    
+    Prop* props[3]
     {
-        Prop{Vector2{9*32.f, 9*32.f}, rock_texture, 1.f},
-        Prop{Vector2{15*32.f, 15*32.f}, log_texture, 2.f},
+        &rock
+        , &log
+        , &cherry
     };
 
 
     // ParticleSystem
-    // Ekstensja - struktur cząsteczek domyślnie 100
     ParticleSystem damage_number_popups;
 
     // Player
     Texture2D player_idle_texture = LoadTexture("textures/characters/knight_idle_spritesheet.png");
     Texture2D player_runing_texture = LoadTexture("textures/characters/knight_run_spritesheet.png");
 
-    // Atrybut pochodny (wyliczany) - width(szerokość) gracza wyliczana jest na podstawie części szerokości jego tekstury zawierającej 6 spritów animacji
-    Character player{window_width, window_height, player_idle_texture, player_runing_texture, ASSET_SCALE, damage_number_popups};
+    BasePlayerCharacter player{ObjectType::Base_Player, window_width, window_height, player_idle_texture, player_runing_texture, ASSET_SCALE, damage_number_popups};
+    BasePlayerCharacter* player_ptr = &player;
 
-    // Przeciążenie - klasa character posiada dwa różne konstruktory
-    Character dummy_NPC{window_width, window_height, player_idle_texture, player_runing_texture, Vector2{4*32.f, 4*32.f}, ASSET_SCALE, damage_number_popups};
+    Actor dummy_NPC{ObjectType::Actor, player_idle_texture, Vector2{4*32.f, 4*32.f}, ASSET_SCALE};
 
-    // Ekstensja trwałość - gracz poprzez zapis pozycji oraz jego statystyk do pliku
-    //  które można wczytać w razie braku pliku incjalizujemy gracza w dommyślnej lokacji z domyślnymi statystykami
     std::ifstream inFile("character_data.txt");
     if (inFile.is_open()) {
         inFile >> player;
@@ -76,37 +82,78 @@ int main()
     Texture2D goblin_idle_texture = LoadTexture("textures/characters/goblin_idle_spritesheet.png");
     Texture2D goblin_run_texture = LoadTexture("textures/characters/goblin_run_spritesheet.png");
 
-    // Atrybut złożony - przeciwnik posiada pozycję w postaci wektora{x,y}
-    Enemy goblin_minion {goblin_idle_texture, goblin_run_texture, Vector2{16*32.f, 16*32.f}, 2.0f, 2.5f, 5, 10, damage_number_popups};
-    Enemy goblin_small {goblin_idle_texture, goblin_run_texture, Vector2{24*32.f, 24*32.f}, 3.0f, 2.f, 6, 20, damage_number_popups};
-    Enemy goblin_medium {goblin_idle_texture, goblin_run_texture, Vector2{12*32.f, 12*32.f}, 4.0f, 1.75f, 7, 40, damage_number_popups};
-    Enemy goblin_boss {goblin_idle_texture, goblin_run_texture, Vector2{48*32.f, 48*32.f}, 6.0f, 1.5f, 10, 80, damage_number_popups};
+    EnemyType* nullEnemy{nullptr};
+
+    EnemyType goblin_minion {ObjectType::Base_Enemy, nullEnemy, goblin_idle_texture, goblin_run_texture, 2.0f, 2.5f, 5, 10};
+    EnemyType goblin_small {ObjectType::Base_Enemy, nullEnemy, goblin_idle_texture, goblin_run_texture, 3.0f, 2.f, 6, 20};
+    EnemyType goblin_medium {ObjectType::Base_Enemy, nullEnemy, goblin_idle_texture, goblin_run_texture, 4.0f, 1.75f, 7, 40};
+    EnemyType goblin_boss {ObjectType::Base_Enemy, nullEnemy, goblin_idle_texture, goblin_run_texture, 6.0f, 1.5f, 10, 80};
 
         // Slime
     Texture2D slime_idle_texture = LoadTexture("textures/characters/slime_idle_spritesheet.png");
     Texture2D slime_run_texture = LoadTexture("textures/characters/slime_run_spritesheet.png");
 
-    Enemy slime_minion {slime_idle_texture, slime_run_texture, Vector2{13*32.f, 13*32.f}, 2.0f, 2.5f * 1.5f, 2, 10, damage_number_popups};
-    Enemy slime_small {slime_idle_texture, slime_run_texture, Vector2{27*32.f, 27*32.f}, 3.0f, 2.f * 1.5f, 2, 20, damage_number_popups};
-    Enemy slime_medium {slime_idle_texture, slime_run_texture, Vector2{42*32.f, 42*32.f}, 4.0f, 1.75f * 1.5f, 3, 30, damage_number_popups};
-    Enemy slime_boss {slime_idle_texture, slime_run_texture, Vector2{36*32.f, 36*32.f}, 6.0f, 1.5f * 1.5f, 5, 60, damage_number_popups};
+    EnemyType slime_minion {ObjectType::Base_Enemy, nullEnemy, slime_idle_texture, slime_run_texture, 2.0f, 2.5f * 1.5f, 2, 10};
+    EnemyType slime_small {ObjectType::Base_Enemy, nullEnemy, slime_idle_texture, slime_run_texture, 3.0f, 2.f * 1.5f, 2, 20};
+    EnemyType slime_medium {ObjectType::Base_Enemy, nullEnemy, slime_idle_texture, slime_run_texture, 4.0f, 1.75f * 1.5f, 3, 30};
+    EnemyType slime_boss {ObjectType::Base_Enemy, nullEnemy, slime_idle_texture, slime_run_texture, 6.0f, 1.5f * 1.5f, 5, 60};
 
-    Enemy* enemies[]
+    // Asocjacja (Agregacja) - zachodzi pomiędzy Enemy Type, a Base Enemy
+    BaseEnemy* enemy1 = goblin_minion.newEnemy();
+    BaseEnemy* enemy2 = goblin_minion.newEnemy();
+    BaseEnemy* enemy3 = goblin_minion.newEnemy();
+    BaseEnemy* enemy4 = goblin_minion.newEnemy();
+    BaseEnemy* enemy5 = goblin_small.newEnemy();
+    BaseEnemy* enemy6 = goblin_medium.newEnemy();
+    BaseEnemy* enemy7 = goblin_boss.newEnemy();
+    BaseEnemy* enemy8 = slime_minion.newEnemy();
+    BaseEnemy* enemy9 = slime_minion.newEnemy();
+    BaseEnemy* enemy10 = slime_minion.newEnemy();
+    BaseEnemy* enemy11 = slime_minion.newEnemy();
+    BaseEnemy* enemy12 = slime_small.newEnemy();
+    BaseEnemy* enemy13 = slime_medium.newEnemy();
+    BaseEnemy* enemy14 = slime_boss.newEnemy();
+    BaseEnemy* enemy15 = slime_small.newEnemy();
+    BaseEnemy* enemy16 = slime_medium.newEnemy();
+
+
+    BaseEnemy* enemies[]
     {
-        &goblin_minion,
-        &goblin_small,
-        &goblin_medium,
-        &goblin_boss,
-        &slime_minion,
-        &slime_small,
-        &slime_medium,
-        &slime_boss
+        enemy1
+        , enemy2
+        , enemy3
+        , enemy4
+        , enemy5
+        , enemy6
+        , enemy7
+        , enemy8
+        , enemy9
+        , enemy10
+        , enemy11
+        , enemy12
+        , enemy13
+        , enemy14
+        , enemy15
+        , enemy16
     };
 
+    GraphicsEngine Graphics_Engine_(world_ptr, player_ptr);
+    
+    for (auto prop: props)
+    {
+        Graphics_Engine_.AddProp(prop);
+    }
+    
     for (auto enemy : enemies)
     {
+        enemy->SetParticleSystem(damage_number_popups);
+        enemy->SetWorldPosition(Vector2{(Random::Int(12,48))*32.f, (Random::Int(12,48))*32.f});
         enemy->SetTarget(&player);
+        Graphics_Engine_.AddGameObject(enemy);
     }
+
+    // Zaimplementować pattern Dirty Flag, Type Object
+    // , Object Pool, Flyweight, Component
 
     std::array<bool, std::size(enemies)> woon{false};
 
@@ -142,17 +189,7 @@ int main()
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
-
-        ClearBackground(Color{99, 155, 255, 255});
-        map_pos = Vector2Scale(player.GetWorldPosition(), -1.f);
-        // Draw the map
-        DrawTextureEx(map_texture, map_pos, 0, ASSET_SCALE, WHITE);
-
-        // Draw props
-        for (auto& prop : props)
-        {
-            prop.Render(player.GetWorldPosition());
-        }
+        Graphics_Engine_.RenderAll();
 
         if (!player.IsAlive())
         {
@@ -183,7 +220,6 @@ int main()
             continue;
         }
 
-        // Draw player character
         player.tick(delta_time);
         if (player.GetWorldPosition().x < (0.f - 32.f*3 - 8.f) * ASSET_SCALE ||
             player.GetWorldPosition().y < (0.f - 32.f*1 - 8.f) * ASSET_SCALE ||
@@ -193,14 +229,14 @@ int main()
         {
             player.UndoMovement();
         }
-        for (auto& prop : props)
+        for (auto prop : props)
         {
-            if (CheckCollisionRecs(player.GetCollisionRectangle(), prop.GetCollisionRectangle(player.GetWorldPosition())))
+            if (CheckCollisionRecs(player.GetCollisionRectangle(), prop->GetCollisionRectangle(player.GetWorldPosition())))
             {
                 player.UndoMovement();
             }
             for (auto enemy : enemies)
-                if (CheckCollisionRecs(enemy->GetCollisionRectangle(), prop.GetCollisionRectangle(player.GetWorldPosition())))
+                if (CheckCollisionRecs(enemy->GetCollisionRectangle(), prop->GetCollisionRectangle(player.GetWorldPosition())))
                     enemy->UndoMovement();
         }
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -209,12 +245,10 @@ int main()
             {
                 if (CheckCollisionRecs(player.GetWeaponCollisionRectangle(), enemy->GetCollisionRectangle()) && enemy->IsAlive())
                 {
-                    // Metoda klasowa - klasy Random generująca floata z zakresu 0 - 1
-                    if(Random::Float() * 100 < 90)
+                    if(Random::Float(1,100) < 90)
                     {
                         player.IncreaseKillCount(enemy->TakeDamage(player.GetDamage()));
                         player.SetParticleToEmitType(Type::ENEMY_HIT);
-                        // Przesłonięcie - klasa enemy przesłania GetScreenPosition z BaseCharacter
                         player.SetParticleToEmitPosition({enemy->GetScreenPosition().x + 6*4.f, enemy->GetScreenPosition().y - 6 * 4.f});
                         damage_number_popups.Emit(player.GetParticleToEmit());
                     }
@@ -244,6 +278,7 @@ int main()
     UnloadTexture(map_texture);     // Unload map texture
     UnloadTexture(rock_texture);    // Unload rock texture
     UnloadTexture(log_texture);     // Unload log texture
+    UnloadTexture(cherry_tree);     // Unload cherry tree texture
     UnloadTexture(goblin_idle_texture);     // Unload goblin idle texture
     UnloadTexture(goblin_run_texture);     // Unload goblin run texture
     CloseWindow();        // Close window and OpenGL context

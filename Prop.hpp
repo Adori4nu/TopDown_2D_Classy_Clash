@@ -1,15 +1,22 @@
 #pragma once
-#include <raylib.h>
+#include "include/raylib.h"
 
-class Prop
+#include "GameObject.hpp"
+class Prop : public GameObject
 {
 public:
-    Prop(const Vector2& world_position, Texture2D& texture, float sprite_scale);
-    Vector2 CalculateScreenPosition(Vector2 player_position) const;
-    void Render(Vector2 player_position);
+    Prop(ObjectType type
+        , const Vector2& world_position
+        , Texture2D& texture
+        , float sprite_scale)
+        : GameObject(type, world_position)
+        , texture(texture), sprite_scale(sprite_scale)
+        {};
+
     Rectangle GetCollisionRectangle(Vector2 player_position) const;
+    __forceinline Texture2D GetTexture() const { return texture; };
+    __forceinline float GetSpriteScale() const { return sprite_scale; };
 private:
     Texture2D texture{};
-    Vector2 world_position{};
     float sprite_scale{4.f};
 };

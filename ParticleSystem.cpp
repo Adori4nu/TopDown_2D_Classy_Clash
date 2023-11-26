@@ -23,7 +23,7 @@ void ParticleSystem::tick(float delta_time)
 
         float life = particle.LifeRamaining / particle.LifeTime;
         Vector3 rgb = Vector3Lerp(particle.ColorBegin, particle.ColorEnd, life);
-        Color color {rgb.x, rgb.y, rgb.z, 255};
+        Color color {(unsigned char)rgb.x, (unsigned char)rgb.y, (unsigned char)rgb.z, 255};
         color.a = color.a * life;
 
         float size = Lerp(particle.SizeEnd, particle.SizeBegin, life);
@@ -82,7 +82,7 @@ void ParticleSystem::Emit(const ParticleProps &particleProps)
 
     particle.Position = particleProps.Position;
     particle.CharacterOrigin = particleProps.CharacterOrigin;
-    particle.Rotation = Random::Float() * (float)std::numbers::pi; //Random::Float() * 2.0f * glm::pi<float>(); //std::numbers::pi
+    particle.Rotation = Random::Float(0,1) * (float)std::numbers::pi; //Random::Float() * 2.0f * glm::pi<float>(); //std::numbers::pi
 
     // Velocity
     particle.Velocity = particleProps.Velocity;
