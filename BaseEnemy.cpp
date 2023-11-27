@@ -10,11 +10,26 @@ void BaseEnemy::tick(float delta_time)
     {
         return;
     }
-    velocity = Vector2Subtract(_target->GetScreenPosition(), GetScreenPosition());
-   
-    if (Vector2Length(velocity) < _radius)
+
+    Vector2 enemy_position_center = GetEnemyCenter();
+    DrawCircleLines(enemy_position_center.x
+            , enemy_position_center.y
+            , _sight_radius
+            , YELLOW
+            );
+    if(CheckCollisionCircleRec(enemy_position_center, _sight_radius, _target->GetCollisionRectangle()))
     {
-        velocity = {};
+        enemy_state = EnemyState::PURSUING;
+        velocity = Vector2Subtract(_target->GetScreenPosition(), GetScreenPosition());
+    
+        if (Vector2Length(velocity) < _radius)
+        {
+            velocity = {};
+        }
+    }
+    else
+    {
+        enemy_state = EnemyState::IDLE;
     }
 
     Pawn::tick(delta_time);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <random>
-#include <iostream>
 
 class Random
 {
@@ -14,14 +13,12 @@ public:
     static float Float(float min, float max)
     {
         static std::uniform_real_distribution<> distrib(min, max);
-        std::cout << distrib(s_RandomEngine) << std::endl;
         return distrib(s_RandomEngine);
     }
 
     static int Int(int min, int max)
     {
         static std::uniform_int_distribution<> distrib(min, max);
-        std::cout << distrib(s_RandomEngine) << std::endl;
         return distrib(s_RandomEngine);
     }
     

@@ -32,7 +32,7 @@ int main()
     // Map
     Texture2D map_texture = LoadTexture("textures/tiled_maps/map.png");
     World base_level(map_texture);
-    World* world_ptr = &base_level;
+    // World* world_ptr = &base_level;
 
     // Prop
         // Rocks
@@ -62,9 +62,9 @@ int main()
     Texture2D player_runing_texture = LoadTexture("textures/characters/knight_run_spritesheet.png");
 
     BasePlayerCharacter player{ObjectType::Base_Player, window_width, window_height, player_idle_texture, player_runing_texture, ASSET_SCALE, damage_number_popups};
-    BasePlayerCharacter* player_ptr = &player;
+    // BasePlayerCharacter* player_ptr = &player;
 
-    Actor dummy_NPC{ObjectType::Actor, player_idle_texture, Vector2{4*32.f, 4*32.f}, ASSET_SCALE};
+    Actor dummy_NPC{ObjectType::Actor, player_idle_texture, Vector2{24*32.f, 24*32.f}, ASSET_SCALE};
 
     std::ifstream inFile("character_data.txt");
     if (inFile.is_open()) {
@@ -137,13 +137,12 @@ int main()
         , enemy16
     };
 
-    GraphicsEngine Graphics_Engine_(world_ptr, player_ptr);
+    GraphicsEngine Graphics_Engine_(&base_level, &player);
     
     for (auto prop: props)
     {
         Graphics_Engine_.AddProp(prop);
     }
-    
     for (auto enemy : enemies)
     {
         enemy->SetParticleSystem(damage_number_popups);
@@ -151,8 +150,9 @@ int main()
         enemy->SetTarget(&player);
         Graphics_Engine_.AddGameObject(enemy);
     }
+    Graphics_Engine_.AddGameObject(&dummy_NPC);
 
-    // Zaimplementować pattern Dirty Flag, Type Object
+    // Zaimplementować pattern Dirty Flag, Type Object - done
     // , Object Pool, Flyweight, Component
 
     std::array<bool, std::size(enemies)> woon{false};
@@ -205,6 +205,8 @@ int main()
             std::string player_kills{"Kill count: "};
             player_kills.append(std::to_string(player.GetKillCount()), 0, 5);
             DrawText(player_kills.c_str(), 55, 100, 30, BLACK);
+            std::string keys{"Press: WSAD - to move, LMB - to attack, ESC - to exit."};
+            DrawText(keys.c_str(), 55, 680, 20, BLACK);
         }
         if (std::all_of(woon.cbegin(), woon.cend(), [](bool KO_val) { return KO_val; }))
         {

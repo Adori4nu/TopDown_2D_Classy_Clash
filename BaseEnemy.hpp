@@ -6,6 +6,13 @@
 class BasePlayerCharacter;
 class ParticleSystem;
 
+enum class EnemyState : short
+{
+    IDLE,
+    PATROLING,
+    PURSUING
+};
+
 class BaseEnemy : public Pawn
 {
     friend class EnemyType;
@@ -13,8 +20,8 @@ class BaseEnemy : public Pawn
 public:
     virtual void tick(float delta_time) override;
     Vector2 GetScreenPosition() const;
-    void SetTarget(BasePlayerCharacter* target) { _target = target; };
-    Rectangle GetCollisionRectangle() const
+    __forceinline void SetTarget(BasePlayerCharacter* target) { _target = target; };
+    __forceinline Rectangle GetCollisionRectangle() const
     {
         return Rectangle {
             GetScreenPosition().x,
@@ -23,6 +30,10 @@ public:
             sprite_scale * height
         };
     }
+    __forceinline Vector2 GetEnemyCenter() const { return Vector2{
+        GetScreenPosition().x + (sprite_scale * width / 2)
+        , GetScreenPosition().y + (sprite_scale * height)};
+        };
 private:
     BaseEnemy(EnemyType& enemy_type
     ) : Pawn(enemy_type._object_type
@@ -45,11 +56,14 @@ private:
 
     EnemyType& enemy_type;
     BasePlayerCharacter* _target;
-    float _radius{25.f};
+    float _radius{25.f}; // attack radius
     float _attack_speed{1.f/(_speed * 0.5f)};
     bool character_in_range{false};
     float character_in_range_time{};
-    
+    // Follow logic
+    float _sight_radius{5*32.f};
+    EnemyState enemy_state{EnemyState::IDLE};
+    // Vector2 enemy_center{};
 };
 
 
