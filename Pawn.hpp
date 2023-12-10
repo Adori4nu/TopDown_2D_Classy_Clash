@@ -5,6 +5,26 @@
 
 #include <iostream>
 
+enum class PawnState : short
+{
+    IDLE_STATE,
+    WALKING_STATE,
+    ATACKING_STATE,
+    DODGING_STATE,
+    HITED_STATE
+};
+
+enum class DodgeDirection : short
+{
+    DODGE_LEFT,
+    DODGE_LEFT_UP,
+    DODGE_LEFT_DOWN,
+    DODGE_RIGHT,
+    DODGE_RIGHT_UP,
+    DODGE_RIGHT_DOWN,
+    DODGE_UP,
+    DODGE_DOWN
+};
 
 class Pawn : public Actor
 {
@@ -78,6 +98,8 @@ public:
 
     __forceinline void SetParticleSystem(ParticleSystem& particle_system) { _damage_particles = &particle_system; };
 
+    __forceinline Vector2 GetWorldPositionLastFrame() const { return world_position_last_frame; };
+
     friend std::ostream& operator<<(std::ostream& os, const Pawn& character) {
         os << static_cast<const Actor&>(character) << ' '
            << character._health << ' ' << character._damage  << ' '
@@ -95,6 +117,8 @@ public:
            >> character.m_Particle.VelocityVariation.y >> character.m_Particle.Damage;
         return is;
     }
+    
+    PawnState _state{PawnState::IDLE_STATE};
 protected:
     // Render
     Texture2D _runing_texture{};

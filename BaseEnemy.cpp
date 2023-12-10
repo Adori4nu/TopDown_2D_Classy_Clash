@@ -11,16 +11,16 @@ void BaseEnemy::tick(float delta_time)
         return;
     }
 
-    Vector2 enemy_position_center = GetEnemyCenter();
-    DrawCircleLines(enemy_position_center.x
-            , enemy_position_center.y
-            , _sight_radius
-            , YELLOW
-            );
-    if(CheckCollisionCircleRec(enemy_position_center, _sight_radius, _target->GetCollisionRectangle()))
+    // Vector2 enemy_position_center = GetEnemyCenter();
+    // DrawCircleLines(enemy_position_center.x
+    //         , enemy_position_center.y
+    //         , _sight_radius
+    //         , YELLOW
+    //         );
+    if(CheckCollisionCircleRec(GetEnemyCenter(), _sight_radius, _target->GetCollisionRectangle()))
     {
         enemy_state = EnemyState::PURSUING;
-        velocity = Vector2Subtract(_target->GetScreenPosition(), GetScreenPosition());
+        velocity = Vector2Subtract(_target->GetWorldPosition(), GetWorldPosition());
     
         if (Vector2Length(velocity) < _radius)
         {
@@ -49,17 +49,17 @@ void BaseEnemy::tick(float delta_time)
             {
                 m_Particle.type = Type::MISS;
             }
-            SetParticleToEmitPosition({_target->GetScreenPosition().x + 6*4.f, _target->GetScreenPosition().y - 6 * 4.f});
+            SetParticleToEmitPosition({_target->GetWorldPosition().x + 6*4.f, _target->GetWorldPosition().y - 6 * 4.f});
             m_Particle.Velocity = _target->GetVelocity();
             _damage_particles->Emit(m_Particle);
             character_in_range = false;
-            character_in_range_time = 0.f;
+            character_in_range_time = {};
         }
     }
     else
     {
         character_in_range = false;
-        character_in_range_time = 0.f;
+        character_in_range_time = {};
     }
 }
 

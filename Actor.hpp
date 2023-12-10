@@ -40,10 +40,9 @@ public:
     virtual Vector2 GetScreenPosition(Vector2 player_position) const { return Vector2Subtract(world_position, player_position); };
     virtual Rectangle GetCollisionRectangle(Vector2 player_position) const
     {
-        Vector2 screen_position {Vector2Subtract(world_position, player_position)};
         return Rectangle {
-            screen_position.x,
-            screen_position.y,
+            world_position.x,
+            world_position.y,
             static_cast<float>(_texture.width) * sprite_scale,
             static_cast<float>(_texture.height) * sprite_scale
         };

@@ -15,7 +15,7 @@
 #include "Random.hpp"
 #include "World.hpp"
 
-#define ASSET_SCALE 4.0f
+// constexpr float ASSET_SCALE{4.0f};
 
 int main()
 {
@@ -30,7 +30,9 @@ int main()
     InitWindow(window_width, window_height, "Top Down 2D Game");
     
     // Map
-    Texture2D map_texture = LoadTexture("textures/tiled_maps/map.png");
+    // "textures/tiled_maps/RPG Nature Tileset.png"
+    // "textures/tiled_maps/map.png"
+    Texture2D map_texture = LoadTexture("textures/tiled_maps/RPG Nature Tileset.png");
     World base_level(map_texture);
     // World* world_ptr = &base_level;
 
@@ -53,7 +55,6 @@ int main()
         , &cherry
     };
 
-
     // ParticleSystem
     ParticleSystem damage_number_popups;
 
@@ -62,7 +63,6 @@ int main()
     Texture2D player_runing_texture = LoadTexture("textures/characters/knight_run_spritesheet.png");
 
     BasePlayerCharacter player{ObjectType::Base_Player, window_width, window_height, player_idle_texture, player_runing_texture, ASSET_SCALE, damage_number_popups};
-    // BasePlayerCharacter* player_ptr = &player;
 
     Actor dummy_NPC{ObjectType::Actor, player_idle_texture, Vector2{24*32.f, 24*32.f}, ASSET_SCALE};
 
@@ -137,19 +137,33 @@ int main()
         , enemy16
     };
 
-    GraphicsEngine Graphics_Engine_(&base_level, &player);
+    GraphicsEngine Graphics_Engine_(window_width
+                                    , window_height
+                                    , &base_level
+                                    , &player
+                                    , &damage_number_popups);
     
     for (auto prop: props)
     {
         Graphics_Engine_.AddProp(prop);
     }
+
     for (auto enemy : enemies)
     {
         enemy->SetParticleSystem(damage_number_popups);
         enemy->SetWorldPosition(Vector2{(Random::Int(12,48))*32.f, (Random::Int(12,48))*32.f});
+        
+        // while (CheckCollisionRecs(enemy->GetCollisionRectangle(), prop->GetCollisionRectangle()))
+        for(auto prop : props)
+            while(CheckCollisionRecs(enemy->GetCollisionRectangle(), prop->GetCollisionRectangle()))
+            {
+                enemy->SetWorldPosition(Vector2{(Random::Int(12,48))*32.f, (Random::Int(12,48))*32.f});
+            }
+        
         enemy->SetTarget(&player);
         Graphics_Engine_.AddGameObject(enemy);
     }
+
     Graphics_Engine_.AddGameObject(&dummy_NPC);
 
     // Zaimplementować pattern Dirty Flag, Type Object - done
@@ -183,62 +197,24 @@ int main()
                 std::cerr << "Unable to open file for writing." << std::endl;
             }
         }
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-        Graphics_Engine_.RenderAll();
-
-        if (!player.IsAlive())
-        {
-            DrawText("Game Over!", window_width / 2 - MeasureText("Game Over!", 40) / 2, window_height / 2 - 40, 40, RED);
-            EndDrawing();
-            continue;
-        }
-        else
-        {
-            std::string player_health{"Health: "};
-            player_health.append(std::to_string(player.GetHealth()), 0, 3);
-            DrawText(player_health.c_str(), 55, 45, 40, RED);
-            std::string player_kills{"Kill count: "};
-            player_kills.append(std::to_string(player.GetKillCount()), 0, 5);
-            DrawText(player_kills.c_str(), 55, 100, 30, BLACK);
-            std::string keys{"Press: WSAD - to move, LMB - to attack, ESC - to exit."};
-            DrawText(keys.c_str(), 55, 680, 20, BLACK);
-        }
-        if (std::all_of(woon.cbegin(), woon.cend(), [](bool KO_val) { return KO_val; }))
-        {
-            DrawText("You Win!", window_width / 2 - MeasureText("You Win!", 40) / 2, window_height / 2 - 40, 40, YELLOW);
-            EndDrawing();
-            std::ofstream file("character_data.txt");
-            if (file.is_open()) {
-                file << player;
-                file.close();
-            } else {
-                std::cerr << "Unable to open file for writing." << std::endl;
-            }
-            continue;
-        }
 
         player.tick(delta_time);
-        if (player.GetWorldPosition().x < (0.f - 32.f*3 - 8.f) * ASSET_SCALE ||
-            player.GetWorldPosition().y < (0.f - 32.f*1 - 8.f) * ASSET_SCALE ||
-            player.GetWorldPosition().x + window_width > (map_texture.width + 32.f*4 - 24.f) * ASSET_SCALE ||
-            player.GetWorldPosition().y + window_height > (map_texture.height + 32.f*2 - 24.f) * ASSET_SCALE
-        )
-        {
-            player.UndoMovement();
-        }
+        // if (player.GetWorldPosition().x < (0.f - 32.f*3 - 8.f) * ASSET_SCALE ||
+        //     player.GetWorldPosition().y < (0.f - 32.f*1 - 8.f) * ASSET_SCALE ||
+        //     player.GetWorldPosition().x + window_width > (map_texture.width + 32.f*4 - 24.f) * ASSET_SCALE ||
+        //     player.GetWorldPosition().y + window_height > (map_texture.height + 32.f*2 - 24.f) * ASSET_SCALE
+        // )
+        // {
+        //     player.UndoMovement();
+        // }
         for (auto prop : props)
         {
-            if (CheckCollisionRecs(player.GetCollisionRectangle(), prop->GetCollisionRectangle(player.GetWorldPosition())))
+            if (CheckCollisionRecs(player.GetCollisionRectangle(), prop->GetCollisionRectangle()))
             {
                 player.UndoMovement();
             }
             for (auto enemy : enemies)
-                if (CheckCollisionRecs(enemy->GetCollisionRectangle(), prop->GetCollisionRectangle(player.GetWorldPosition())))
+                if (CheckCollisionRecs(enemy->GetCollisionRectangle(), prop->GetCollisionRectangle()))
                     enemy->UndoMovement();
         }
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -251,13 +227,13 @@ int main()
                     {
                         player.IncreaseKillCount(enemy->TakeDamage(player.GetDamage()));
                         player.SetParticleToEmitType(Type::ENEMY_HIT);
-                        player.SetParticleToEmitPosition({enemy->GetScreenPosition().x + 6*4.f, enemy->GetScreenPosition().y - 6 * 4.f});
+                        player.SetParticleToEmitPosition({enemy->GetWorldPosition().x + 6*4.f, enemy->GetWorldPosition().y - 6 * 4.f});
                         damage_number_popups.Emit(player.GetParticleToEmit());
                     }
                     else
                     {
                         player.SetParticleToEmitType(Type::DODGE);
-                        player.SetParticleToEmitPosition({enemy->GetScreenPosition().x + 6*4.f, enemy->GetScreenPosition().y - 6 * 4.f});
+                        player.SetParticleToEmitPosition({enemy->GetWorldPosition().x + 6*4.f, enemy->GetWorldPosition().y - 6 * 4.f});
                         damage_number_popups.Emit(player.GetParticleToEmit());
                     }
                 }
@@ -269,9 +245,28 @@ int main()
         }
         damage_number_popups.tick(delta_time);
 
-        DrawFPS(window_width - 60, 10);
+        //----------------------------------------------------------------------------------
 
-        EndDrawing();
+        // Draw
+        //----------------------------------------------------------------------------------
+        
+
+        Graphics_Engine_.RenderAll();
+        if (std::all_of(woon.cbegin(), woon.cend(), [](bool KO_val) { return KO_val; }))
+        {
+            BeginDrawing();
+            DrawText("You Win!", window_width / 2 - MeasureText("You Win!", 40) / 2, window_height / 2 - 40, 40, YELLOW);
+            EndDrawing();
+            std::ofstream file("character_data.txt");
+            if (file.is_open()) {
+                file << player;
+                file.close();
+            } else {
+                std::cerr << "Unable to open file for writing." << std::endl;
+            }
+            WaitTime(3);
+            break;
+        }
         //----------------------------------------------------------------------------------
     }
 

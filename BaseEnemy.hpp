@@ -24,16 +24,18 @@ public:
     __forceinline Rectangle GetCollisionRectangle() const
     {
         return Rectangle {
-            GetScreenPosition().x,
-            GetScreenPosition().y,
+            world_position.x,
+            world_position.y,
             sprite_scale * width,
             sprite_scale * height
         };
     }
     __forceinline Vector2 GetEnemyCenter() const { return Vector2{
-        GetScreenPosition().x + (sprite_scale * width / 2)
-        , GetScreenPosition().y + (sprite_scale * height)};
+        world_position.x + (sprite_scale * width / 2)
+        , world_position.y + (sprite_scale * height)};
         };
+
+    __forceinline float GetSightRadius() const { return _sight_radius; };
 private:
     BaseEnemy(EnemyType& enemy_type
     ) : Pawn(enemy_type._object_type
@@ -64,6 +66,7 @@ private:
     float _sight_radius{5*32.f};
     EnemyState enemy_state{EnemyState::IDLE};
     // Vector2 enemy_center{};
+    float _patrol_radius{8*32.f};
 };
 
 

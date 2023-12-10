@@ -13,7 +13,7 @@ public:
         , texture(texture), sprite_scale(sprite_scale)
         {};
 
-    Rectangle GetCollisionRectangle(Vector2 player_position) const;
+    Rectangle GetCollisionRectangle() const;
     __forceinline Texture2D GetTexture() const { return texture; };
     __forceinline float GetSpriteScale() const { return sprite_scale; };
 private:

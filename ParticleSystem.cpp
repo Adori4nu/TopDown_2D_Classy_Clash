@@ -21,55 +21,6 @@ void ParticleSystem::tick(float delta_time)
         particle.Position = {particle.Position.x + particle.Velocity.x * delta_time, particle.Position.y + particle.Velocity.y * delta_time};
         particle.Rotation += 5.f * delta_time;
 
-        float life = particle.LifeRamaining / particle.LifeTime;
-        Vector3 rgb = Vector3Lerp(particle.ColorBegin, particle.ColorEnd, life);
-        Color color {(unsigned char)rgb.x, (unsigned char)rgb.y, (unsigned char)rgb.z, 255};
-        color.a = color.a * life;
-
-        float size = Lerp(particle.SizeEnd, particle.SizeBegin, life);
-
-        switch (particle.type)
-        {
-        case PLAYER_HIT:
-        case PLAYER_CRITICAL_HIT:
-        case ENEMY_HIT:
-        case ENEMY_CRITITCAL_HIT:
-            DrawTextPro(
-                GetFontDefault()
-                , std::to_string(particle.Damage).c_str()
-                , particle.Position
-                , particle.CharacterOrigin
-                , 0.f, (int)size * 12, 0, color
-            );
-            break;
-        case HEAL:
-            DrawTextPro(
-                GetFontDefault()
-                , std::to_string(particle.Damage).c_str()
-                , particle.Position
-                , particle.CharacterOrigin
-                , 0.f, (int)size * 6, 4, color
-            );
-            break;
-        case MISS:
-            DrawTextPro(
-                GetFontDefault()
-                , particle.Miss
-                , particle.Position
-                , particle.CharacterOrigin
-                , particle.Rotation * 15.f, (int)size * 6, 4, color
-            );
-            break;
-        case DODGE:
-            DrawTextPro(
-                GetFontDefault()
-                , particle.Dodge
-                , particle.Position
-                , particle.CharacterOrigin
-                , particle.Rotation * 15.f, (int)size * 6, 4, color
-            );
-            break;
-        }
     }
 }
 

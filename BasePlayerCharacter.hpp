@@ -6,6 +6,7 @@
 #include "InputComponent.hpp"
 #include "Pawn.hpp"
 
+
 class BasePlayerCharacter : public Pawn
 {
 public:
@@ -66,8 +67,8 @@ public:
     Rectangle GetCollisionRectangle() const
     {
         return Rectangle {
-            GetScreenPosition().x + 4 * sprite_scale,
-            GetScreenPosition().y + 4 * sprite_scale,
+            world_position.x + 4 * sprite_scale,
+            world_position.y + 4 * sprite_scale,
             (width - 7) * sprite_scale,
             (height - 5) * sprite_scale
         };
@@ -118,4 +119,11 @@ private:
     float rotation{};
     // Gameplay mechanics
     int _kill_count{};
+public:
+    float _dodge_length{0.1f};
+    float dodge_running_time{};
+    int resolve{100};
+    float _resolve_point_recharge_rate{0.2f};
+    float last_resolve_recharge{};
+    DodgeDirection dodge_direction{};
 };

@@ -32,16 +32,9 @@ struct ParticleProps
 
 class ParticleSystem
 {
-public:
-    ParticleSystem(){ m_ParticlePool.resize(100); };
-
-    void tick(float delta_time);
-
-    // void Render();
-
-    void Emit(const ParticleProps& particleProps);
-
 private:
+
+public:
     struct Particle
     {
         Type type;
@@ -62,6 +55,18 @@ private:
 
         bool Active = false;
     };
+    ParticleSystem(){ m_ParticlePool.resize(100); };
+
+    void tick(float delta_time);
+
+    // void Render();
+
+    void Emit(const ParticleProps& particleProps);
+
+    // std::span<Particle> particle_view(m_ParticlePool);
+
+    __forceinline std::vector<Particle> GetParticles() const { return m_ParticlePool; };
+private:
 
     std::vector<Particle> m_ParticlePool;
     uint32_t m_PoolIndex = 99;

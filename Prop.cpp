@@ -3,12 +3,12 @@
 #include <raymath.h>
 
 
-Rectangle Prop::GetCollisionRectangle(Vector2 player_position) const
+Rectangle Prop::GetCollisionRectangle() const
 {
-    Vector2 screen_position {Vector2Subtract(world_position, player_position)};
+    // Vector2 screen_position {Vector2Subtract(world_position, player_position)};
     return Rectangle {
-        screen_position.x,
-        screen_position.y,
+        world_position.x,
+        world_position.y,
         static_cast<float>(texture.width) * sprite_scale,
         static_cast<float>(texture.height) * sprite_scale
     };
