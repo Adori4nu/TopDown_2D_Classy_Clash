@@ -6,7 +6,9 @@
 #include <memory>
 #include <vector>
 
+#include "appState.hpp"
 #include "BasePlayerCharacter.hpp"
+#include "gameConstants.hpp"
 
 // class Actor;
 class BaseEnemy;
@@ -15,27 +17,30 @@ class GameObject;
 // class Pawn;
 class Prop;
 class World;
+class Screen;
 
 class GraphicsEngine
 {
-public:
-    GraphicsEngine(int window_width
-                , int window_height
-                , World* world
-                , BasePlayerCharacter* player
-                , ParticleSystem* particle_system)
-                : _window_width(window_width)
-                , _window_height(window_height)
-                , _world(world)
-                , _player_character(player)
-                , _particle_system(particle_system)
-                {
-                    // gameObjects.resize(100);
-                    // environmentProps.resize(100);
-                };
+private:
+GraphicsEngine(){};
+    // GraphicsEngine(int window_width
+    //             , int window_height
+    //             , World* world
+    //             , BasePlayerCharacter* player
+    //             , ParticleSystem* particle_system)
+    //             : _window_width(window_width)
+    //             , _window_height(window_height)
+    //             , _world(world)
+    //             , _player_character(player)
+    //             , damage_number_popups(particle_system)
+    //             {
+    //                 // gameObjects.resize(100);
+    //                 // environmentProps.resize(100);
+    //             };
                 
     GraphicsEngine(const GraphicsEngine&) = delete;
     GraphicsEngine& operator=(const GraphicsEngine&) = delete;
+public:
     // static std::shared_ptr<GraphicsEngine> GetInstance() {
     //     if(!instance)
     //         instance = std::make_shared<GraphicsEngine>();
@@ -46,6 +51,10 @@ public:
     // {
     //     instance = std::make_shared<GraphicsEngine>();
     // };
+    static GraphicsEngine& Get()
+    {
+        return s_Instance;
+    }
 
     void AddGameObject(GameObject* gameObject) {
         gameObjects.push_back(gameObject);
@@ -54,8 +63,15 @@ public:
         environmentProps.push_back(gameObject);
     }
 
+    void SetWorldToRender(World* world_to_render) { _world = world_to_render; };
+    void SetPlayerToRender(BasePlayerCharacter* player_character) { _player_character = player_character; };
+    void SetParticleSystemToRender(ParticleSystem* damage_number_popups) { _damage_number_popups = damage_number_popups; };
+    void SetCameraToRender(Camera2D* camera) { _player_camera = camera; }
+    void SetScreenToRender(Screen* screen_to_render) { active_screen = screen_to_render; };
 
-    void RenderAll();
+    void RenderAll(AppState app_state);
+
+private:
 
     void RenderWorld(World* world);
 
@@ -70,15 +86,17 @@ public:
     void Render(BasePlayerCharacter* player);
 
     void Render(ParticleSystem* particle_system);
-private:
-    
-    // static std::shared_ptr<GraphicsEngine> instance;
-    int _window_width;
-    int _window_height;
+
+    static GraphicsEngine s_Instance;
+
+    int _window_width{window_width};
+    int _window_height{window_height};
     World* _world;
     BasePlayerCharacter* _player_character;
     std::vector<GameObject*> gameObjects;
     std::vector<Prop*> environmentProps;
-    ParticleSystem* _particle_system;
-    Camera2D player_camera{Vector2{(float)_window_width/2, (float)_window_height/2}, _player_character->GetWorldPosition(), 0.0, 1.0};
+    ParticleSystem* _damage_number_popups;
+    Camera2D* _player_camera;
+    Screen* active_screen;
+    // Camera2D player_camera{Vector2{(float)_window_width/2, (float)_window_height/2}, _player_character->GetWorldPosition(), 0.0, 1.0};
 };

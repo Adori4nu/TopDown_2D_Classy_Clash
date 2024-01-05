@@ -5,6 +5,7 @@
 
 #include "InputComponent.hpp"
 #include "Pawn.hpp"
+#include "helperFunctions.hpp"
 
 
 class BasePlayerCharacter : public Pawn
@@ -51,7 +52,6 @@ public:
     {
         _speed = 4.0f;
         _damage = 20;
-        _health = 100;
         _damage_particles = &damage_particles;
         m_Particle.SizeBegin = 6.0f;
         m_Particle.SizeEnd = 1.0f;
@@ -73,7 +73,7 @@ public:
             (height - 5) * sprite_scale
         };
     }
-    __forceinline Texture2D GetWeaponTexture() const { return _weapon_texture; };
+    __forceinline Texture2D* GetWeaponTexture() const { return _weapon_texture; };
     __forceinline float GetWeaponScale() const { return _weapon_scale; };
     __forceinline Rectangle GetWeaponCollisionRectangle() const { return _weapon_collision_rectangle; };
     __forceinline Vector2 GetWeaponOrigin() const { return orirgin_of_weapon; };
@@ -84,6 +84,8 @@ public:
     __forceinline int GetKillCount() const { return _kill_count; };
     __forceinline void IncreaseKillCount(int increase_by) { _kill_count += increase_by; };
     __forceinline void SetKillCount(int kill_count) { _kill_count = kill_count; };
+
+    __forceinline void SetWeaponTexture(Texture& weapon_texture) { _weapon_texture = &weapon_texture; };
 
     friend std::ostream& operator<<(std::ostream& os, const BasePlayerCharacter& character) {
         os << static_cast<const Pawn&>(character) << ' '
@@ -97,13 +99,6 @@ public:
         return is;
     }
 
-    ~BasePlayerCharacter()
-    {
-        UnloadTexture(_texture); 
-        UnloadTexture(_idle_texture);
-        UnloadTexture(_runing_texture);
-        UnloadTexture(_weapon_texture); 
-    };
 private:
     // Input Component
     InputComponent _inputComponent;
@@ -111,7 +106,8 @@ private:
     int _window_width{};
     int _window_height{};
     // Weapon
-    Texture2D _weapon_texture{LoadTexture("textures/characters/weapon_sword.png")};
+    // CHANGE ALL TEXTURES TO ints so there wouldn't be problem with initialization and classes would be lighter
+    Texture2D* _weapon_texture{};
     Rectangle _weapon_collision_rectangle{};
     float _weapon_scale{5.f};
     Vector2 orirgin_of_weapon{};
@@ -126,4 +122,5 @@ public:
     float _resolve_point_recharge_rate{0.2f};
     float last_resolve_recharge{};
     DodgeDirection dodge_direction{};
+    Camera2D player_camera{Vector2{(float)_window_width/2, (float)_window_height/2}, world_position, 0.0, 1.0};
 };

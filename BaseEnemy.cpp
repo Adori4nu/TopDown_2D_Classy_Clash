@@ -6,17 +6,11 @@
 
 void BaseEnemy::tick(float delta_time)
 {
-    if (!_target || !IsAlive())
+    if (!_target || !_healthComponent.is_alive)
     {
         return;
     }
 
-    // Vector2 enemy_position_center = GetEnemyCenter();
-    // DrawCircleLines(enemy_position_center.x
-    //         , enemy_position_center.y
-    //         , _sight_radius
-    //         , YELLOW
-    //         );
     if(CheckCollisionCircleRec(GetEnemyCenter(), _sight_radius, _target->GetCollisionRectangle()))
     {
         enemy_state = EnemyState::PURSUING;
@@ -42,7 +36,9 @@ void BaseEnemy::tick(float delta_time)
         {
             if (Random::Float(1,100) > 50)
             {
-                m_Particle.Damage = _target->TakeDamage(_damage);
+                m_Particle.Damage = _damage;
+                // _target->_healthComponent
+                _target->GetHealthComponent().TakeDamage(_damage);
                 m_Particle.type = Type::PLAYER_HIT;
             }
             else
@@ -61,9 +57,4 @@ void BaseEnemy::tick(float delta_time)
         character_in_range = false;
         character_in_range_time = {};
     }
-}
-
-Vector2 BaseEnemy::GetScreenPosition() const
-{
-    return Vector2Subtract(GetWorldPosition(), _target->GetWorldPosition());
 }

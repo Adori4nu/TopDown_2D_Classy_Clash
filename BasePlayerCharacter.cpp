@@ -9,7 +9,7 @@ void BasePlayerCharacter::PostInitConstruct(Vector2 position)
 {
     SetWorldPosition(position);
     _damage = 20;
-    _health = 100;
+    // _healthComponent = HealthComponent{};
     m_Particle.SizeBegin = 6.0f;
     m_Particle.SizeEnd = 1.0f;
     m_Particle.SizeVariation = 0.5f;
@@ -19,7 +19,7 @@ void BasePlayerCharacter::PostInitConstruct(Vector2 position)
 
 void BasePlayerCharacter::tick(float delta_time)
 {
-    if (!IsAlive())
+    if (!_healthComponent.is_alive)
     {
         return;
     }
@@ -42,7 +42,6 @@ void BasePlayerCharacter::tick(float delta_time)
         if(_state == PawnState::DODGING_STATE)
         {
             dodge_running_time += delta_time;
-            std::cout << "Dodge running_time: "<< dodge_running_time << std::endl;
             SetWorldPosition(Vector2Add(world_position, Vector2Scale(Vector2Normalize(velocity), _speed*2.5f)));
         }
         else
@@ -58,29 +57,32 @@ void BasePlayerCharacter::tick(float delta_time)
     }
     velocity = {};
 
+    // this is bad we cant attack without weapon and origin of weapon is in wrong place
+    if (!_weapon_texture)
+        return;
     if (right_left > 0.f)
     {
-        orirgin_of_weapon = Vector2{0.0f, _weapon_texture.height * _weapon_scale};
+        orirgin_of_weapon = Vector2{0.0f, _weapon_texture->height * _weapon_scale};
         weapon_origin_offset = Vector2{35.f, 50.f};
         _weapon_collision_rectangle = 
         {
             world_position.x + weapon_origin_offset.x,
-            world_position.y + weapon_origin_offset.y - _weapon_texture.height * _weapon_scale,
-            _weapon_texture.width * _weapon_scale,
-            _weapon_texture.height * _weapon_scale
+            world_position.y + weapon_origin_offset.y - _weapon_texture->height * _weapon_scale,
+            _weapon_texture->width * _weapon_scale,
+            _weapon_texture->height * _weapon_scale
         };
         rotation = IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 45.f : -15.f;
     }
     else
     {
-        orirgin_of_weapon = Vector2{_weapon_texture.width * _weapon_scale, _weapon_texture.height * _weapon_scale};
+        orirgin_of_weapon = Vector2{_weapon_texture->width * _weapon_scale, _weapon_texture->height * _weapon_scale};
         weapon_origin_offset = Vector2{25.f, 50.f};
         _weapon_collision_rectangle = 
         {
-            world_position.x + weapon_origin_offset.x - _weapon_texture.width * _weapon_scale,
-            world_position.y + weapon_origin_offset.y - _weapon_texture.height * _weapon_scale,
-            _weapon_texture.width * _weapon_scale,
-            _weapon_texture.height * _weapon_scale
+            world_position.x + weapon_origin_offset.x - _weapon_texture->width * _weapon_scale,
+            world_position.y + weapon_origin_offset.y - _weapon_texture->height * _weapon_scale,
+            _weapon_texture->width * _weapon_scale,
+            _weapon_texture->height * _weapon_scale
         };
         rotation = IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? -45.f : 15.f;
     }

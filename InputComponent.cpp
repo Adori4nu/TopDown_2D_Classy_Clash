@@ -169,10 +169,8 @@ void InputComponent::update(BasePlayerCharacter& player)
         }
         break;
     case DODGING_STATE:
-        std::cout << "I'm in dodge" << std::endl;
         if(player.dodge_running_time >= player._dodge_length)
         {
-            std::cout << "I'm in dodge after dodge" << std::endl;
             player.dodge_running_time = {};
             player.resolve -= 20;
             player._state = WALKING_STATE;

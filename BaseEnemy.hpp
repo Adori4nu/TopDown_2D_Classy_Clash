@@ -19,7 +19,6 @@ class BaseEnemy : public Pawn
 
 public:
     virtual void tick(float delta_time) override;
-    Vector2 GetScreenPosition() const;
     __forceinline void SetTarget(BasePlayerCharacter* target) { _target = target; };
     __forceinline Rectangle GetCollisionRectangle() const
     {

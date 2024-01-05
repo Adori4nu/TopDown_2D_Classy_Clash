@@ -21,14 +21,3 @@ void Pawn::tick(float delta_time)
     }
     velocity = {};
 }
-
-int Pawn::TakeDamage(int damage)
-{
-    _health -= damage;
-    if (_health <= 0.f)
-    {
-        SetIsAlive(false);
-        return 1;
-    }
-    return 0;
-}
