@@ -9,7 +9,6 @@ void BasePlayerCharacter::PostInitConstruct(Vector2 position)
 {
     SetWorldPosition(position);
     _damage = 20;
-    // _healthComponent = HealthComponent{};
     m_Particle.SizeBegin = 6.0f;
     m_Particle.SizeEnd = 1.0f;
     m_Particle.SizeVariation = 0.5f;
@@ -30,6 +29,7 @@ void BasePlayerCharacter::tick(float delta_time)
         last_resolve_recharge = {};
         ++resolve;
     }
+    velocity = {};
     
     _inputComponent.update(*this);
 
@@ -39,7 +39,7 @@ void BasePlayerCharacter::tick(float delta_time)
 
     if (Vector2Length(velocity) != 0)
     {
-        if(_state == PawnState::DODGING_STATE)
+        if(_state == PlayerState::DODGING_STATE)
         {
             dodge_running_time += delta_time;
             SetWorldPosition(Vector2Add(world_position, Vector2Scale(Vector2Normalize(velocity), _speed*2.5f)));
@@ -49,13 +49,7 @@ void BasePlayerCharacter::tick(float delta_time)
             SetWorldPosition(Vector2Add(world_position, Vector2Scale(Vector2Normalize(velocity), _speed)));
         }
         velocity.x < 0.f ? right_left = -1.f : right_left = 1.f;
-        _texture = _runing_texture;
     }
-    else
-    {
-        _texture = _idle_texture;
-    }
-    velocity = {};
 
     // this is bad we cant attack without weapon and origin of weapon is in wrong place
     if (!_weapon_texture)
@@ -71,7 +65,7 @@ void BasePlayerCharacter::tick(float delta_time)
             _weapon_texture->width * _weapon_scale,
             _weapon_texture->height * _weapon_scale
         };
-        rotation = IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? 45.f : -15.f;
+        rotation = IsMouseButtonDown(MOUSE_BUTTON_LEFT) ? 45.f : -15.f;
     }
     else
     {
@@ -84,8 +78,17 @@ void BasePlayerCharacter::tick(float delta_time)
             _weapon_texture->width * _weapon_scale,
             _weapon_texture->height * _weapon_scale
         };
-        rotation = IsMouseButtonDown(MOUSE_LEFT_BUTTON) ? -45.f : 15.f;
+        rotation = IsMouseButtonDown(MOUSE_BUTTON_LEFT) ? -45.f : 15.f;
     }
+
+    // if (player_character.GetWorldPosition().x < (0.f - 32.f*3 - 8.f) * ASSET_SCALE ||
+    //     player_character.GetWorldPosition().y < (0.f - 32.f*1 - 8.f) * ASSET_SCALE ||
+    //     player_character.GetWorldPosition().x + window_width > (map_texture.width + 32.f*4 - 24.f) * ASSET_SCALE ||
+    //     player_character.GetWorldPosition().y + window_height > (map_texture.height + 32.f*2 - 24.f) * ASSET_SCALE
+    // )
+    // {
+    //     player_character.UndoMovement();
+    // }
     
 }
 
@@ -96,4 +99,14 @@ Vector2 BasePlayerCharacter::GetScreenPosition() const
         static_cast<float>(_window_width) * 0.5f - sprite_scale * (0.5f * width),
         static_cast<float>(_window_height) * 0.5f - sprite_scale * (0.5f * height)
     };
+}
+
+void ActivateItem(int item)
+{
+
+}
+
+void DropItem(int item)
+{
+
 }

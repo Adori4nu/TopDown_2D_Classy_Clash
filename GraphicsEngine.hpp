@@ -87,6 +87,8 @@ private:
 
     void Render(ParticleSystem* particle_system);
 
+    void RenderGameClock(float game_clock);
+
     static GraphicsEngine s_Instance;
 
     int _window_width{window_width};
@@ -95,8 +97,8 @@ private:
     BasePlayerCharacter* _player_character;
     std::vector<GameObject*> gameObjects;
     std::vector<Prop*> environmentProps;
+    std::vector<BaseEnemy*> enemies_to_render;
     ParticleSystem* _damage_number_popups;
     Camera2D* _player_camera;
     Screen* active_screen;
-    // Camera2D player_camera{Vector2{(float)_window_width/2, (float)_window_height/2}, _player_character->GetWorldPosition(), 0.0, 1.0};
 };

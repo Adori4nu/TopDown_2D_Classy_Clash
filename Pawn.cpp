@@ -13,11 +13,6 @@ void Pawn::tick(float delta_time)
         // Set world_position = world_position + velocity
         SetWorldPosition(Vector2Add(world_position, Vector2Scale(Vector2Normalize(velocity), _speed)));
         velocity.x < 0.f ? right_left = -1.f : right_left = 1.f;
-        _texture = _runing_texture;
-    }
-    else
-    {
-        _texture = _idle_texture;
     }
     velocity = {};
 }

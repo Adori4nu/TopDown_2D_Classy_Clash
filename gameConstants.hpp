@@ -39,7 +39,8 @@ namespace TextureIDs
         
         namespace UI
         {
-
+            constexpr int inventory_sprite = 11;
+            constexpr int equipment_sprite = 12;
         }
 
         namespace Equipment

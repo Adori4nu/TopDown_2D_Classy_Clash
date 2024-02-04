@@ -40,9 +40,9 @@ void InitResources()
 
     // setup the assets to load
     // textures_to_load.emplace_back(); // logo texture
-    textures_to_load.emplace_back("textures/tiled_maps/RPG Nature Tileset.png");
-    textures_to_load.emplace_back("textures/tiled_maps/Rock.png");
-    textures_to_load.emplace_back("textures/tiled_maps/Log.png");
+    textures_to_load.emplace_back("textures/tiled_maps/RPG_Nature_Tileset.png");
+    textures_to_load.emplace_back("textures/tiled_maps/rock.png");
+    textures_to_load.emplace_back("textures/tiled_maps/log.png");
     textures_to_load.emplace_back("textures/tiled_maps/cherry_tree.png");
     textures_to_load.emplace_back("textures/characters/knight_idle_spritesheet.png");
     textures_to_load.emplace_back("textures/characters/knight_run_spritesheet.png");
@@ -51,6 +51,8 @@ void InitResources()
     textures_to_load.emplace_back("textures/characters/slime_idle_spritesheet.png");
     textures_to_load.emplace_back("textures/characters/slime_run_spritesheet.png");
     textures_to_load.emplace_back("textures/characters/weapon_sword.png");
+    textures_to_load.emplace_back("textures/tiled_maps/Inventory_window.png");
+    textures_to_load.emplace_back("textures/tiled_maps/Equipment.png");
 
     // setup default texture
     Image checkered_texture = GenImageChecked(32, 32, 8, 8, PINK, RAYWHITE);
@@ -59,7 +61,6 @@ void InitResources()
 
     sounds_to_load.emplace_back("sounds/hover.ogg");
     sounds_to_load.emplace_back("sounds/mouseclick.ogg");
-    // sounds_to_load.emplace_back("sounds/click.xxx");
 
     _total_to_load = textures_to_load.size() + sounds_to_load.size();
 }
@@ -120,19 +121,8 @@ void FinalizeLoad()
 
     for (int i = 0; i < 14; i++)
     {
-        // CenterSprite(i);
-        // CenterSprite(i + 14);
     }
 
-    // CenterSprite(PlayerSprite);
-
-    // CenterSprite(xyzSprite);
-
-    // SetSpriteBorders(InventoryBackgroundSprite, 10);
-    // SetSpriteBorders(ItemBackgroundSprite, 10);
-
-    // SetupDefaultItems();
-    // SetupDefaultMobs();
 }
 
 void PlaySound(int sound)
@@ -159,6 +149,11 @@ void StopBGM()
         UnloadMusicStream(BGM);
         BGM.frameCount = 0;
     }
+}
+
+Music GetBGM()
+{
+    return BGM;
 }
 
 void ShutdownAudio()

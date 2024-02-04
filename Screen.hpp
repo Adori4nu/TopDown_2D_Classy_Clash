@@ -1,13 +1,13 @@
 #pragma once
 #include "include/raylib.h"
 
+#include "Item.hpp"
 #include "Main.hpp"
 
 #include <string>
 
 class BasePlayerCharacter;
 
-// implement Draw Functions for Screens
 class Screen
 {
 public:
@@ -89,14 +89,14 @@ public:
         DrawText(CopyrightString, GetScreenWidth() - 2 - MeasureText(CopyrightString, 10), GetScreenHeight() - 10, 10, GRAY);
 
         // play button
-        if (CenteredButton(GetScreenHeight() / 4, "Play"))
+        if (ToLeftButton(GetScreenHeight() / 4, "Play"))
             StartGame();
         
         // options button
-        CenteredButton(GetScreenHeight()/2, "Options");
+        ToLeftButton(GetScreenHeight()/2, "Options");
 
         // quit button
-        if (CenteredButton(GetScreenHeight() - (GetScreenHeight() / 4), "Quit"))
+        if (ToLeftButton(GetScreenHeight() - (GetScreenHeight() / 4), "Quit"))
             QuitApplication();
     }
 };
@@ -173,16 +173,27 @@ public:
 
     BasePlayerCharacter& player_character;
     bool IsUiClick(const Vector2& pos);
-    bool InventoryOpen = false;
+    bool InventoryOpen{false};
+    bool EquipmentOpen{false};
     
 private:
-	bool DrawButton(float x, float y, int itemId = -1, int quantity = 1, Color border = BROWN, Color center = BEIGE);
-	void DrawInventory();	
+	bool DrawButton(float x, float y, int itemId = -1, int quantity = 1, Color border = PURPLE, Color center = BLUE, float scale = 1.f, float alpha = 1.f, float borde_alpha = 1.f);
+	void DrawInventory();
+    void DrawEquipment();
 	// void ShowItemToolTip(const Item* item, const Rectangle& rect);
 
 private:
-	float ButtonSize = 70;
+	float ButtonSize = 64;
 	float ButtonInset = 6;
 
-	// const Item* HoveredItem = nullptr;
+	const Item* HoveredItem = nullptr;
+};
+
+class OptionsScreen : public Screen
+{
+public:
+    void Draw() override
+    {
+
+    }
 };

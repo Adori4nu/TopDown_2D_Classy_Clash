@@ -21,8 +21,6 @@
 #include "Screen.hpp"
 #include "World.hpp"
 
-// constexpr float ASSET_SCALE{4.0f};
-
 AppState applicationState = AppState::Startup;
 
 MainMenuScreen MainMenu;
@@ -51,6 +49,34 @@ void UpdateMainMenu()
 {
     if (IsKeyPressed(KEY_ESCAPE))
         QuitApplication();
+}
+
+// void UpdateInventory()
+// {
+// }
+
+// void UpdateEquipment()
+// {
+// }
+
+// void UpdateOptions()
+// {
+// }
+
+void GameHUDOpen()
+{
+    applicationState = AppState::InPlayerUI;
+}
+
+void GameHUDClosed()
+{
+    applicationState = AppState::Running;
+}
+
+bool UpdateGameHUD(AppState& game_state)
+{
+
+    return false;
 }
 
 void StartGame()
@@ -174,9 +200,13 @@ int main()
             break;
 
         case Running:
-            UpdateGame(stop_playing);
+            UpdateGame(applicationState);
             break;
 
+        case InPlayerUI:
+            UpdateGameHUD(applicationState);
+            break;
+            
         case Paused:
             UpdatePaused();
             break;
@@ -184,11 +214,20 @@ int main()
         Graphics_Engine_.RenderAll(applicationState);
         UpdateAudio();
     }
+    
+    std::ofstream file("../character_data.txt");
+    if (file.is_open()) {
+        file << GetPlayerCharacter();
+        file.close();
+        std::cout << "SAVED!!!\n";
+    } else {
+        std::cerr << "Unable to open file for writing." << std::endl;
+    }
 
     ShutdownAudio();
     CleanupResources();
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
-
+    std::cin.get();
     return 0;
 }

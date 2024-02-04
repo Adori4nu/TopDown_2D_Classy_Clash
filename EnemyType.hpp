@@ -2,6 +2,7 @@
 #include "include/raylib.h"
 
 #include "ParticleSystem.hpp"
+#include "GraphicsComponent.hpp"
 #include "GameObject.hpp"
 class BaseEnemy;
 
@@ -10,8 +11,8 @@ class EnemyType
 public:
     EnemyType(ObjectType type
             , EnemyType* parent
-            , Texture2D idle_texture
-            , Texture2D run_texture
+            , int idle_texture
+            , int run_texture
             , float scale
             , float speed
             , int damage
@@ -26,11 +27,12 @@ public:
             , _health(health)
             {};
     BaseEnemy* newEnemy();
+    
     ObjectType _object_type;
     EnemyType* _parent;
     // Render
-    Texture2D _idle_texture{};
-    Texture2D _runing_texture{};
+    int _idle_texture{};
+    int _runing_texture{};
     float sprite_scale{4.f};
     // Stats
     float _speed{};

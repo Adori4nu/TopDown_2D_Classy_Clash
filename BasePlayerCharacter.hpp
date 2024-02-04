@@ -3,11 +3,16 @@
 
 #include <iostream>
 
+#include "combat.hpp"
 #include "InputComponent.hpp"
 #include "Pawn.hpp"
 #include "helperFunctions.hpp"
 
-
+struct InventoryItem
+{
+    int ItemId;
+    int Quantity;
+};
 class BasePlayerCharacter : public Pawn
 {
 public:
@@ -15,8 +20,8 @@ public:
     ObjectType type
     , int window_width
     , int window_height
-    , Texture2D idle_texture
-    , Texture2D run_texture
+    , int idle_texture
+    , int run_texture
     , float scale
     , float speed
     , int damage
@@ -38,8 +43,8 @@ public:
     ObjectType type
     , int window_width
     , int window_height
-    , Texture2D idle_texture
-    , Texture2D run_texture
+    , int idle_texture
+    , int run_texture
     , float scale
     , ParticleSystem& damage_particles
     )
@@ -51,7 +56,7 @@ public:
     , _window_width(window_width), _window_height(window_height)
     {
         _speed = 4.0f;
-        _damage = 20;
+        _damage = 10;
         _damage_particles = &damage_particles;
         m_Particle.SizeBegin = 6.0f;
         m_Particle.SizeEnd = 1.0f;
@@ -99,12 +104,21 @@ public:
         return is;
     }
 
+    PlayerState _state{PlayerState::IDLE_STATE};
 private:
     // Input Component
     InputComponent _inputComponent;
     // Render
     int _window_width{};
     int _window_height{};
+
+    int _equiped_weapon{};
+    int _equiped_armor{};
+
+    float _pickup_distance{24.f};
+    
+    float _attack_range{16.f};
+    
     // Weapon
     // CHANGE ALL TEXTURES TO ints so there wouldn't be problem with initialization and classes would be lighter
     Texture2D* _weapon_texture{};
@@ -113,6 +127,9 @@ private:
     Vector2 orirgin_of_weapon{};
     Vector2 weapon_origin_offset{};
     float rotation{};
+    AttackInformations attack_info{ "Punch", _damage, _damage, _attack_range };
+    
+    DefenseInformations defense_info{ 4, 4 };
     // Gameplay mechanics
     int _kill_count{};
 public:
@@ -123,4 +140,15 @@ public:
     float last_resolve_recharge{};
     DodgeDirection dodge_direction{};
     Camera2D player_camera{Vector2{(float)_window_width/2, (float)_window_height/2}, world_position, 0.0, 1.0};
+    
+    std::vector<InventoryItem> BackpackContent;
+    // event callbacks
+    // a callback that takes an int
+    typedef void(*ItemCallback)(int);
+
+    // callbacks that the HUD can trigger on inventory
+    ItemCallback ActivateItemCallback = nullptr;
+    ItemCallback EquipArmorCallback = nullptr;
+    ItemCallback EquipWeaponCallback = nullptr;
+    ItemCallback DropItemCallback = nullptr;
 };

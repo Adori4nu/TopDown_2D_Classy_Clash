@@ -8,7 +8,7 @@
 
 void InputComponent::update(BasePlayerCharacter& player)
 {
-    using enum PawnState;
+    using enum PlayerState;
     using enum DodgeDirection;
     switch (player._state)
     {

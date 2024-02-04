@@ -1,12 +1,17 @@
 #pragma once
+#include <vector>
+
+#include "appState.hpp"
+#include "SceneType.hpp"
 
 // class Actor;
-// class BaseEnemy;
-// class BasePlayerCharacter;
+class BaseEnemy;
+class BasePlayerCharacter;
 // class GameObject;
 // class Pawn;
 // class Prop;
-// class World;
+class ParticleSystem;
+class World;
 
 // class makes no sense right now
 // class Game
@@ -21,11 +26,7 @@
 
     // bool GameShouldClose() const;
     // void Tick();
-    void InitGame();
-    void ActivateGame();
 // private:
-    void UpdateGame(bool& should_stop_playing);
-    void QuitGame();
     // void Draw();
 
     // World _world{GetTexture(TextureIDs::TileSetTexture)};
@@ -35,3 +36,13 @@
     // BasePlayerCharacter _player_character{ObjectType::Base_Player, window_width, window_height, GetTexture(TextureIDs::Actors::player_idle_texture), GetTexture(TextureIDs::Actors::player_runing_texture), ASSET_SCALE, damage_number_popups};
 // };
 
+void InitGame();
+void ActivateGame();
+void UpdateGame(AppState& game_state);
+void QuitGame();
+float GetGameClock();
+std::vector<BaseEnemy>& GetEnemyPool();
+BasePlayerCharacter& GetPlayerCharacter();
+World& GetWorld();
+ParticleSystem& GetParticleSystem();
+SceneType GetSceneType();

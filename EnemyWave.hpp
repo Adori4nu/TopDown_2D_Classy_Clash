@@ -1,15 +1,14 @@
 #pragma once
-#include "include/raylib.h"
+#include "EnemyType.hpp"
 
-#include <array>
+#include "optional"
 
-class BaseEnemy;
-
-class EnemyWave
+struct EnemyWave // "Spawn_Info"
 {
-public:
-    EnemyWave();
-
-private:
-    std::array<std::array<BaseEnemy, 64>, 3> EnemyWaves;
+    int starting_time{};
+    int end_time{};
+    EnemyType mob;
+    int mob_count{};
+    float mob_spawn_delay{};
+    float spawn_wait_clock{};
 };

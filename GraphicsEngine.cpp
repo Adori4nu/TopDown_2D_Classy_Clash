@@ -1,10 +1,13 @@
 #include "GraphicsEngine.hpp"
 
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 #include "Actor.hpp"
 #include "BaseEnemy.hpp"
 #include "BasePlayerCharacter.hpp"
+#include "Game.hpp"
 #include "Pawn.hpp"
 #include "Prop.hpp"
 #include "Screen.hpp"
@@ -13,9 +16,17 @@
 #include "include/raylib.h"
 #include "GraphicsEngine.hpp"
 
-// std::unique_ptr<GraphicsEngine> instance = nullptr;
-
 GraphicsEngine GraphicsEngine::s_Instance;
+
+bool operator!= (const Vector2& lhs,const Vector2& rhs) noexcept
+{
+    return lhs.x != rhs.x || lhs.y != rhs.y;
+}
+
+bool operator== (const Vector2& lhs,const Vector2& rhs) noexcept
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
 
 void GraphicsEngine::RenderAll(AppState app_state)
 {
@@ -29,6 +40,7 @@ void GraphicsEngine::RenderAll(AppState app_state)
         case Menu:
             active_screen->Draw();
             EndDrawing();
+            ClearBackground(Color{0, 0, 0, 255});
             return;
         case Paused:
         case GameOver:
@@ -82,11 +94,6 @@ void GraphicsEngine::RenderAll(AppState app_state)
 
     Render(_damage_number_popups);
 
-    if (dynamic_cast<GameHudScreen*>(active_screen))
-    {
-        active_screen->Draw();
-    }
-
     EndMode2D();
 
     if (!(_player_character->GetHealthComponent().is_alive))
@@ -108,7 +115,7 @@ void GraphicsEngine::RenderAll(AppState app_state)
         DrawText(player_kills.c_str(), 55, 100, 30, BLACK);
         
         std::string keys{"Press: WSAD - to move, LMB - to attack, ESC - to exit."};
-        DrawText(keys.c_str(), 55, 680, 20, BLACK);
+        DrawText(keys.c_str(), 55, 600, 20, BLACK);
     }
 
     if (active_screen)
@@ -117,6 +124,7 @@ void GraphicsEngine::RenderAll(AppState app_state)
         {
             using enum AppState;
         case Running:
+        case InPlayerUI:
             active_screen->Draw();
             break;
         case Paused:
@@ -128,6 +136,8 @@ void GraphicsEngine::RenderAll(AppState app_state)
             break;
         }
     }
+
+    RenderGameClock(GetGameClock());
 
     DrawFPS(_window_width - 60, 10);
 
@@ -160,11 +170,12 @@ void GraphicsEngine::RenderWorld(World *world)
 void GraphicsEngine::Render(Prop *prop)
 {
     Vector2 wrld_pos = prop->GetWorldPosition();
-    DrawTextureEx(prop->GetTexture(), wrld_pos, 0.f, prop->GetSpriteScale(), WHITE);
+    const auto& texture = GetTexture(prop->GetSpriteComponent().idle_texture_id_) ;
+    DrawTextureEx(texture, wrld_pos, 0.f, prop->GetSpriteScale(), WHITE);
     DrawRectangleLines(wrld_pos.x
     , wrld_pos.y
-    , static_cast<float>(prop->GetTexture().width) * prop->GetSpriteScale()
-    , prop->GetTexture().height * prop->GetSpriteScale()
+    , static_cast<float>(texture.width) * prop->GetSpriteScale()
+    , texture.height * prop->GetSpriteScale()
     , BLUE
     );
 }
@@ -172,15 +183,16 @@ void GraphicsEngine::Render(Prop *prop)
 void GraphicsEngine::Render(Actor *actor)
 {
     Vector2 wrld_pos = actor->GetWorldPosition();
+    const auto& texture = GetTexture(actor->GetSpriteComponent().idle_texture_id_);
     Rectangle source{actor->GetFrame() * actor->GetWidth(), 0.f, actor->GetRightLeftDirection() * actor->GetWidth(), actor->GetHeight()};
     Rectangle dest{wrld_pos.x, wrld_pos.y, actor->GetSpriteScale() * actor->GetWidth(), actor->GetSpriteScale() * actor->GetHeight()};
-    DrawTexturePro(actor->GetTexture(), source, dest, Vector2{}, 0.f, WHITE);
+    DrawTexturePro(texture, source, dest, Vector2{}, 0.f, WHITE);
     DrawRectangleLines(wrld_pos.x
     , wrld_pos.y
-    , static_cast<float>(actor->GetTexture().width) / actor->GetMaxFrame() * actor->GetSpriteScale()
-    , actor->GetTexture().height * actor->GetSpriteScale()
-    , RED)
-    ;
+    , static_cast<float>(texture.width) / actor->GetSpriteComponent().max_frame * actor->GetSpriteScale()
+    , texture.height * actor->GetSpriteScale()
+    , RED
+    );
 }
 
 void GraphicsEngine::Render(Pawn *pawn)
@@ -189,23 +201,51 @@ void GraphicsEngine::Render(Pawn *pawn)
     {
         return;
     }
-    auto actor = dynamic_cast<Actor*>(pawn);
-    GraphicsEngine::Render(actor);
+    Vector2 wrld_pos = pawn->GetWorldPosition();
+    Texture2D* texture;
+    // still not working properly because velocity is always 0 at this point after end of game logic update
+    if (Vector2Length(pawn->GetVelocity()) < 0.00001f)
+        texture = &GetTexture(pawn->GetSpriteComponent().idle_texture_id_);
+    else
+        texture = &GetTexture(pawn->GetSpriteComponent().runing_texture_id_);
+    Rectangle source{pawn->GetFrame() * pawn->GetWidth(), 0.f, pawn->GetRightLeftDirection() * pawn->GetWidth(), pawn->GetHeight()};
+    Rectangle dest{wrld_pos.x, wrld_pos.y, pawn->GetSpriteScale() * pawn->GetWidth(), pawn->GetSpriteScale() * pawn->GetHeight()};
+    DrawTexturePro(*texture, source, dest, Vector2{}, 0.f, WHITE);
+    DrawRectangleLines(wrld_pos.x
+    , wrld_pos.y
+    , static_cast<float>(texture->width) / pawn->GetSpriteComponent().max_frame * pawn->GetSpriteScale()
+    , texture->height * pawn->GetSpriteScale()
+    , RED
+    );
 }
 
 void GraphicsEngine::Render(BaseEnemy *enemy)
 {
-    if (enemy->GetHealthComponent().is_alive)
+    if (!(enemy->GetHealthComponent().is_alive))
     {
-        Vector2 enemy_position_center = enemy->GetEnemyCenter();
-        DrawCircleLines(enemy_position_center.x
-                , enemy_position_center.y
-                , enemy->GetSightRadius()
-                , YELLOW
-                );
+        return;
     }
-    auto pawn = dynamic_cast<Pawn*>(enemy);
-    GraphicsEngine::Render(pawn);
+    Vector2 enemy_position_center = enemy->GetEnemyCenter();
+    DrawCircleLines(enemy_position_center.x
+            , enemy_position_center.y
+            , enemy->GetSightRadius()
+            , YELLOW
+            );
+    Vector2 wrld_pos = enemy->GetWorldPosition();
+    Texture2D* texture;
+    if (enemy->GetEnemyState() == EnemyState::IDLE)
+        texture = &GetTexture(enemy->GetSpriteComponent().idle_texture_id_);
+    else
+        texture = &GetTexture(enemy->GetSpriteComponent().runing_texture_id_);
+    Rectangle source{enemy->GetFrame() * enemy->GetWidth(), 0.f, enemy->GetRightLeftDirection() * enemy->GetWidth(), enemy->GetHeight()};
+    Rectangle dest{wrld_pos.x, wrld_pos.y, enemy->GetSpriteScale() * enemy->GetWidth(), enemy->GetSpriteScale() * enemy->GetHeight()};
+    DrawTexturePro(*texture, source, dest, Vector2{}, 0.f, WHITE);
+    DrawRectangleLines(wrld_pos.x
+    , wrld_pos.y
+    , static_cast<float>(texture->width) / enemy->GetSpriteComponent().max_frame * enemy->GetSpriteScale()
+    , texture->height * enemy->GetSpriteScale()
+    , RED)
+    ;
 }
 
 void GraphicsEngine::Render(BasePlayerCharacter *player)
@@ -213,9 +253,14 @@ void GraphicsEngine::Render(BasePlayerCharacter *player)
     if (!player)
         return;
     Vector2 player_world_pos = player->GetWorldPosition();
+    Texture2D* texture;
+    if(player->_state != PlayerState::IDLE_STATE)
+        texture = &GetTexture(player->GetSpriteComponent().runing_texture_id_);
+    else
+        texture = &GetTexture(player->GetSpriteComponent().idle_texture_id_);
     Rectangle source{player->GetFrame() * player->GetWidth(), 0.f, player->GetRightLeftDirection() * player->GetWidth(), player->GetHeight()};
     Rectangle dest{player_world_pos.x, player_world_pos.y, player->GetSpriteScale() * player->GetWidth(), player->GetSpriteScale() * player->GetHeight()};
-    DrawTexturePro(player->GetTexture(), source, dest, Vector2{}, 0.f, WHITE);
+    DrawTexturePro(*texture, source, dest, Vector2{}, 0.f, WHITE);
     
     if (!(player->GetWeaponTexture()))
         return;
@@ -236,7 +281,6 @@ void GraphicsEngine::Render(ParticleSystem *particle_system)
 {
     if (!particle_system)
         return;
-    // std::for_each(particle_system->GetParticles().begin(), particle_system->GetParticles().end(), [particle_system](auto& particle) mutable
     for (auto& particle : particle_system->GetParticles())
     {
         if (!particle.Active)
@@ -293,4 +337,17 @@ void GraphicsEngine::Render(ParticleSystem *particle_system)
         }
     }
     
+}
+
+void GraphicsEngine::RenderGameClock(float game_clock)
+{
+    static std::stringstream time_text;
+    
+    time_text << std::setw(2) << std::setfill('0') << int(game_clock) / 60;
+    time_text << ":";
+    time_text << std::setw(2) << std::setfill('0') << int(game_clock) % 60;
+    DrawTextPro(GetFontDefault(), time_text.str().c_str(), Vector2{ window_width/2, 30 }, Vector2{ 0,0 }, 0.f, 24, 4, BLACK);
+    
+    time_text.str("");
+    time_text.clear();
 }

@@ -3,6 +3,9 @@
 
 #include "Pawn.hpp"
 #include "EnemyType.hpp"
+#include "helperFunctions.hpp"
+#include "gameConstants.hpp"
+
 class BasePlayerCharacter;
 class ParticleSystem;
 
@@ -35,6 +38,10 @@ public:
         };
 
     __forceinline float GetSightRadius() const { return _sight_radius; };
+    __forceinline EnemyState GetEnemyState() const { return enemy_state; };
+
+    Vector2 SetRandomPositionOnCircle(Vector2 cicle_center, float circle_radius=(window_width*0.5));
+
 private:
     BaseEnemy(EnemyType& enemy_type
     ) : Pawn(enemy_type._object_type
@@ -46,9 +53,6 @@ private:
         , enemy_type._health)
         , enemy_type(enemy_type)
     {
-        _texture = _idle_texture;
-        width = static_cast<float>(_texture.width) / max_frame;
-        height = static_cast<float>(_texture.height);
         m_Particle.SizeBegin = 6.0f;
         m_Particle.SizeEnd = 1.0f;
         m_Particle.SizeVariation = 0.5f;
@@ -67,5 +71,3 @@ private:
     // Vector2 enemy_center{};
     float _patrol_radius{8*32.f};
 };
-
-

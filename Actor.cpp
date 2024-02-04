@@ -7,11 +7,11 @@ void Actor::tick(float delta_time)
     running_time += delta_time;
     if (running_time >= frame_update_time)
     {
-        frame++;
+        sprite_info.frame++;
         running_time = 0.f;
-        if (frame > max_frame)
+        if (sprite_info.frame > sprite_info.max_frame)
         {
-            frame = 0;
+            sprite_info.frame = 0;
         }
     }
 };

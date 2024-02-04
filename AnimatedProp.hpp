@@ -5,9 +5,10 @@
 class AnimatedProp : public Prop
 {
 public:
+    // TODO: FIX constructor
     AnimatedProp(ObjectType type
                 , const Vector2& world_position
-                , Texture2D& texture
+                , int texture
                 , float sprite_scale
                 , int sprite_count
                 )
@@ -20,6 +21,4 @@ public:
 protected:
 
 private:
-    int _sprite_count{};
-    Rectangle _source{};
 };

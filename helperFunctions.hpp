@@ -24,6 +24,7 @@ void PlaySound(int sound);
 
 void StartBGM(const char* music_file);
 void StopBGM();
+Music GetBGM();
 
 void ShutdownAudio();
 

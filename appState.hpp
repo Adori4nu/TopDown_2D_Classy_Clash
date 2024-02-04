@@ -6,6 +6,7 @@ enum class AppState
     Loading,
     Menu,
     Running,
+    InPlayerUI,
     Paused,
     GameOver,
     Quitting

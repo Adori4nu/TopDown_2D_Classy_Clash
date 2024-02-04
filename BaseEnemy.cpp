@@ -1,8 +1,11 @@
 #include "BaseEnemy.hpp"
 #include "BasePlayerCharacter.hpp"
 #include "Random.hpp"
+#include "Game.hpp"
 
 #include "include/raymath.h"
+
+#include <numbers>
 
 void BaseEnemy::tick(float delta_time)
 {
@@ -10,21 +13,31 @@ void BaseEnemy::tick(float delta_time)
     {
         return;
     }
-
-    if(CheckCollisionCircleRec(GetEnemyCenter(), _sight_radius, _target->GetCollisionRectangle()))
+    if(GetSceneType() == SceneType::STORY_MODE)
+        if(CheckCollisionCircleRec(GetEnemyCenter(), _sight_radius, _target->GetCollisionRectangle()))
+        {
+            enemy_state = EnemyState::PURSUING;
+            velocity = Vector2Subtract(_target->GetWorldPosition(), GetWorldPosition());
+        
+            if (Vector2Length(velocity) < _radius)
+            {
+                velocity = {};
+            }
+        }
+        else
+        {
+            enemy_state = EnemyState::IDLE;
+        }
+    else
     {
-        enemy_state = EnemyState::PURSUING;
         velocity = Vector2Subtract(_target->GetWorldPosition(), GetWorldPosition());
-    
+
         if (Vector2Length(velocity) < _radius)
         {
             velocity = {};
         }
     }
-    else
-    {
-        enemy_state = EnemyState::IDLE;
-    }
+    
 
     Pawn::tick(delta_time);
 
@@ -37,7 +50,6 @@ void BaseEnemy::tick(float delta_time)
             if (Random::Float(1,100) > 50)
             {
                 m_Particle.Damage = _damage;
-                // _target->_healthComponent
                 _target->GetHealthComponent().TakeDamage(_damage);
                 m_Particle.type = Type::PLAYER_HIT;
             }
@@ -57,4 +69,13 @@ void BaseEnemy::tick(float delta_time)
         character_in_range = false;
         character_in_range_time = {};
     }
+}
+
+Vector2 BaseEnemy::SetRandomPositionOnCircle(Vector2 cicle_center, float circle_radius)
+{
+    float angle = Random::Float(0, 1) / 2.f * std::numbers::pi;
+    return Vector2{
+        cicle_center.x + circle_radius * (Random::Float(0,1) > 0.5f ? std::cos(angle) : (-1.f * std::cos(angle)))
+        , cicle_center.y + circle_radius * (Random::Float(0,1) > 0.5f ? std::sin(angle) : (-1.f * std::sin(angle)))
+    };
 }

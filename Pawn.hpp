@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-enum class PawnState : short
+enum class PlayerState : short
 {
     IDLE_STATE,
     WALKING_STATE,
@@ -31,8 +31,8 @@ class Pawn : public Actor
 {
 public:
     Pawn(ObjectType type
-        , Texture2D idle_texture
-        , Texture2D run_texture
+        , int idle_texture
+        , int run_texture
         , float scale
         , float speed
         , int damage
@@ -43,15 +43,14 @@ public:
         , idle_texture
         , scale
         )
-        , _runing_texture(run_texture)
         , _speed(speed)
         , _damage(damage)
         , _damage_particles(&damage_particles)
         , _healthComponent(health)
-        {};
+        { sprite_info.runing_texture_id_ = run_texture; };
     Pawn(ObjectType type
-        , Texture2D idle_texture
-        , Texture2D run_texture
+        , int idle_texture
+        , int run_texture
         , float scale
         , float speed
         , int damage
@@ -61,22 +60,20 @@ public:
         , idle_texture
         , scale
         )
-        , _runing_texture(run_texture)
         , _speed(speed)
         , _damage(damage)
         , _healthComponent(health)
-        {};
+        { sprite_info.runing_texture_id_ = run_texture; };
     Pawn(ObjectType type
-        , Texture2D idle_texture
-        , Texture2D run_texture
+        , int idle_texture
+        , int run_texture
         , float scale
         ) 
         : Actor(type
         , idle_texture
         , scale
         )
-        , _runing_texture(run_texture)
-        {};
+        { sprite_info.runing_texture_id_ = run_texture; };
     virtual void tick(float delta_time) override;
 
     __forceinline void UndoMovement() { world_position = world_position_last_frame; };
@@ -117,18 +114,15 @@ public:
 
     HealthComponent& GetHealthComponent() { return _healthComponent; };
     
-    PawnState _state{PawnState::IDLE_STATE};
     // Components
 protected:
     // Render
-    Texture2D _runing_texture{};
+    // Texture2D _runing_texture{};
     Vector2 world_position_last_frame{};
     Vector2 velocity{};
     // Stats
     float _speed{4.f};
     int _damage{10};
-public:
-protected:
     HealthComponent _healthComponent;
     // Particles
     ParticleSystem* _damage_particles;
